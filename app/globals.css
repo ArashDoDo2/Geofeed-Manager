@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+button {
+  @apply transition-colors;
+}
+
+input,
+select,
+textarea {
+  @apply rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+}
+
+table {
+  @apply w-full border-collapse border border-gray-300;
+}
+
+th,
+td {
+  @apply border border-gray-300 px-4 py-2 text-left;
+}
+
+th {
+  @apply bg-gray-200 font-semibold;
+}
+
+tr:nth-child(even) {
+  @apply bg-gray-100;
+}

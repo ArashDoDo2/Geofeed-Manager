@@ -137,3 +137,8 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+# Geofeed Manager specific
+data/geo.db
+public/geofeed-*.csv
+.env.local
+.env.*.local
