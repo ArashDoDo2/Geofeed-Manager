@@ -1,11 +1,9 @@
 'use client'
 
 import { supabase } from '@/lib/supabase-client'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

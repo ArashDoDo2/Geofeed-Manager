@@ -47,7 +47,7 @@ export async function DELETE(
     try {
       const filePath = path.join(process.cwd(), 'public', `geofeed-${geofeedId}.csv`)
       await fs.unlink(filePath)
-    } catch (err) {
+    } catch {
       // File might not exist, that's okay
     }
 

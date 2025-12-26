@@ -51,7 +51,7 @@ export async function POST(
     const publicDir = path.join(process.cwd(), 'public')
     try {
       await fs.mkdir(publicDir, { recursive: true })
-    } catch (err) {
+    } catch {
       // Directory might already exist
     }
 

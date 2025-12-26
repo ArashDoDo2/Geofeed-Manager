@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface IpRange {
   id: string
@@ -38,11 +38,7 @@ export default function GeofeedDetailPage() {
     postalCode: '',
   })
 
-  useEffect(() => {
-    fetchGeofeedAndRanges()
-  }, [])
-
-  const fetchGeofeedAndRanges = async () => {
+  const fetchGeofeedAndRanges = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -63,7 +59,11 @@ export default function GeofeedDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [geofeedId])
+
+  useEffect(() => {
+    fetchGeofeedAndRanges()
+  }, [fetchGeofeedAndRanges])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
