@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface GeofeedFile {
   id: string
@@ -23,29 +23,40 @@ export default function DashboardPage() {
   const [generatingId, setGeneratingId] = useState<string | null>(null)
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchGeofeeds()
-  }, [])
+  const fetchGeofeeds = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch('/geo/api/geofeeds', { signal })
 
-  const fetchGeofeeds = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const res = await fetch('/geo/api/geofeeds')
-      const data = await res.json()
+        if (!res.ok) {
+          throw new Error('Unable to reach the geofeed service')
+        }
 
-      if (!data.success) {
-        setError(data.error || 'Failed to fetch geofeeds')
-        return
+        const data = await res.json()
+
+        if (!data.success) {
+          setError(data.error || 'Failed to fetch geofeeds')
+          return
+        }
+
+        setGeofeeds(data.data || [])
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
       }
+    },
+    [],
+  )
 
-      setGeofeeds(data.data || [])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }
+  useEffect(() => {
+    const controller = new AbortController()
+    void fetchGeofeeds(controller.signal)
+    return () => controller.abort()
+  }, [fetchGeofeeds])
 
   const handleCreateGeofeed = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -116,7 +127,27 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading) return <div className="text-center text-gray-600">Loading...</div>
+  const handleCopyUrl = async () => {
+    if (!generatedUrl) return
+    try {
+      await navigator.clipboard.writeText(generatedUrl)
+      setError(null)
+    } catch (err) {
+      setError('Could not copy the generated URL')
+    }
+  }
+
+  if (loading)
+    return (
+      <div className="space-y-4">
+        <div className="h-6 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="space-y-2 rounded border border-gray-200 p-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-28 animate-pulse rounded bg-gray-200" />
+        </div>
+      </div>
+    )
 
   return (
     <div>
@@ -131,19 +162,44 @@ export default function DashboardPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
-          {error}
+        <div className="mb-4 flex items-start justify-between gap-4 rounded bg-red-100 p-4 text-red-700">
+          <p className="flex-1 text-sm sm:text-base">{error}</p>
+          <button
+            onClick={() => fetchGeofeeds()}
+            className="rounded bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700"
+          >
+            Retry
+          </button>
         </div>
       )}
 
       {generatedUrl && (
         <div className="mb-4 rounded bg-green-100 p-4 text-green-700">
-          <p>Geofeed generated successfully!</p>
-          <p className="break-all">
-            <a href={generatedUrl} target="_blank" rel="noopener noreferrer">
+          <p className="font-semibold">Geofeed generated successfully!</p>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <a
+              href={generatedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="break-all text-blue-800 underline"
+            >
               {generatedUrl}
             </a>
-          </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCopyUrl}
+                className="rounded bg-green-600 px-3 py-1 text-sm font-semibold text-white hover:bg-green-700"
+              >
+                Copy URL
+              </button>
+              <button
+                onClick={() => setGeneratedUrl(null)}
+                className="rounded bg-green-200 px-3 py-1 text-sm font-semibold text-green-800 hover:bg-green-300"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -185,7 +241,16 @@ export default function DashboardPage() {
       )}
 
       {geofeeds.length === 0 ? (
-        <p className="text-gray-600">No geofeeds yet. Create one to get started!</p>
+        <div className="rounded border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-gray-600">
+          <p className="mb-3 font-medium">No geofeeds yet.</p>
+          <p className="mb-4 text-sm">Create your first geofeed to start adding IP ranges.</p>
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+          >
+            Create geofeed
+          </button>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded border border-gray-300">
           <table>
@@ -194,7 +259,7 @@ export default function DashboardPage() {
                 <th>Name</th>
                 <th>Created At</th>
                 <th>Ranges</th>
-                <th>Actions</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -204,7 +269,7 @@ export default function DashboardPage() {
                   <td>{new Date(geofeed.createdAt).toLocaleDateString()}</td>
                   <td>{geofeed._count?.ranges || 0}</td>
                   <td>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
                       <button
                         onClick={() => router.push(`/geo/dashboard/${geofeed.id}`)}
                         className="text-sm text-blue-600 hover:text-blue-800"

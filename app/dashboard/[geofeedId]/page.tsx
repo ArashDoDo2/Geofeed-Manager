@@ -38,31 +38,42 @@ export default function GeofeedDetailPage() {
     postalCode: '',
   })
 
-  const fetchGeofeedAndRanges = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const res = await fetch(`/geo/api/geofeeds/${geofeedId}/ranges`)
-      const data = await res.json()
+  const fetchGeofeedAndRanges = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`/geo/api/geofeeds/${geofeedId}/ranges`, { signal })
 
-      if (!data.success) {
-        setError(data.error || 'Failed to fetch ranges')
-        return
-      }
+        if (!res.ok) {
+          throw new Error('Unable to load geofeed details')
+        }
 
-      setRanges(data.data?.ranges || [])
-      if (data.data?.geofeed) {
-        setGeofeed(data.data.geofeed)
+        const data = await res.json()
+
+        if (!data.success) {
+          setError(data.error || 'Failed to fetch ranges')
+          return
+        }
+
+        setRanges(data.data?.ranges || [])
+        if (data.data?.geofeed) {
+          setGeofeed(data.data.geofeed)
+        }
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }, [geofeedId])
+    },
+    [geofeedId],
+  )
 
   useEffect(() => {
-    fetchGeofeedAndRanges()
+    const controller = new AbortController()
+    void fetchGeofeedAndRanges(controller.signal)
+    return () => controller.abort()
   }, [fetchGeofeedAndRanges])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -159,7 +170,27 @@ export default function GeofeedDetailPage() {
     }
   }
 
-  if (loading) return <div className="text-center text-gray-600">Loading...</div>
+  const handleCopyGenerated = async () => {
+    if (!generatingUrl || generatingUrl === 'generating') return
+    try {
+      await navigator.clipboard.writeText(generatingUrl)
+      setError(null)
+    } catch (err) {
+      setError('Could not copy the generated URL')
+    }
+  }
+
+  if (loading)
+    return (
+      <div className="space-y-4">
+        <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+        <div className="h-6 w-48 animate-pulse rounded bg-gray-200" />
+        <div className="space-y-2 rounded border border-gray-200 p-4">
+          <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+        </div>
+      </div>
+    )
 
   return (
     <div>
@@ -172,16 +203,41 @@ export default function GeofeedDetailPage() {
 
       <h1 className="mb-2 text-3xl font-bold text-gray-900">{geofeed?.name}</h1>
       {generatingUrl && generatingUrl !== 'generating' && (
-        <p className="mb-4 text-green-600">
-          <a href={generatingUrl} target="_blank" rel="noopener noreferrer">
+        <div className="mb-4 flex flex-col gap-2 rounded bg-green-100 p-3 text-green-800 sm:flex-row sm:items-center sm:justify-between">
+          <a
+            href={generatingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline"
+          >
             📥 Download CSV
           </a>
-        </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCopyGenerated}
+              className="rounded bg-green-600 px-3 py-1 text-sm font-semibold text-white hover:bg-green-700"
+            >
+              Copy URL
+            </button>
+            <button
+              onClick={() => setGeneratingUrl(null)}
+              className="rounded bg-green-200 px-3 py-1 text-sm font-semibold text-green-900 hover:bg-green-300"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
       )}
 
       {error && (
-        <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
-          {error}
+        <div className="mb-4 flex items-start justify-between gap-4 rounded bg-red-100 p-4 text-red-700">
+          <p className="flex-1 text-sm sm:text-base">{error}</p>
+          <button
+            onClick={() => fetchGeofeedAndRanges()}
+            className="rounded bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700"
+          >
+            Retry
+          </button>
         </div>
       )}
 
