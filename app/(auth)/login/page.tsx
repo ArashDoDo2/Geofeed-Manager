@@ -65,7 +65,7 @@ export default function LoginPage() {
             {isLoading ? 'Signing in...' : 'Sign in with Google'}
           </button>
           <a
-            href="/help"
+            href="/geo/help"
             className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700/80 hover:text-emerald-900"
           >
             Help & Guides
