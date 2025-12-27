@@ -1,29 +1,26 @@
 #!/bin/bash
-# Setup script for Geofeed Manager
+# Setup script for Geofeed Manager (local development)
+
+set -euo pipefail
 
 echo "Setting up Geofeed Manager..."
 
-# Install dependencies
 echo "Installing dependencies..."
 npm install
 
-# Create data directory
 echo "Creating data directory..."
 mkdir -p data
 
-# Generate Prisma client
-echo "Generating Prisma client..."
-npm run prisma:generate
+echo "Checking environment..."
+if [ ! -f .env.local ]; then
+  echo "Missing .env.local"
+  echo "Copy .env.example to .env.local and fill in Supabase credentials."
+  exit 1
+fi
 
-# Run migrations
 echo "Running database migrations..."
-npm run prisma:migrate -- --name init
+npm run prisma:migrate
 
 echo "Setup complete!"
-echo ""
-echo "Next steps:"
-echo "1. Copy .env.example to .env.local"
-echo "2. Fill in your Supabase credentials"
-echo "3. Run: npm run dev"
-echo ""
-echo "Visit http://localhost:3000/geo to start"
+echo "Run: npm run dev"
+echo "Open: http://localhost:3000/geo"
