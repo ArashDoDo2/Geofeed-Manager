@@ -139,6 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 # Geofeed Manager specific
 data/geo.db
+prisma/data/
 public/geofeed-*.csv
 .env.local
 .env.*.local

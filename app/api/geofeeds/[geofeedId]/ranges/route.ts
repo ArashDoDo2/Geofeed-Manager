@@ -1,16 +1,18 @@
-import { prisma } from '@/lib/db'
-import { getSession } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import { getRouteHandlerSession } from '@/lib/supabase-server'
 
-// Simple CIDR validation
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$|^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\/\d{1,3}$/
   return cidrRegex.test(cidr.trim())
 }
 
-// Simple country code validation (2-letter ISO 3166-1)
 function isValidCountryCode(code: string): boolean {
   return /^[A-Z]{2}$/.test(code.trim())
+}
+
+async function verifyGeofeedOwnership(userId: string, geofeedId: string) {
+  return prisma.geofeedFile.findFirst({ where: { id: geofeedId, userId } })
 }
 
 export async function GET(
@@ -18,21 +20,20 @@ export async function GET(
   { params }: { params: Promise<{ geofeedId: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session = await getRouteHandlerSession()
     if (!session) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { geofeedId } = await params
     const userId = session.user.id
+    const { geofeedId } = await params
+    if (!geofeedId) {
+      return NextResponse.json({ success: false, error: 'Invalid geofeed id' }, { status: 400 })
+    }
 
-    // Verify the geofeed belongs to the user
-    const geofeed = await prisma.geofeedFile.findUnique({
-      where: { id: geofeedId },
-    })
-
-    if (!geofeed || geofeed.userId !== userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
+    const geofeed = await verifyGeofeedOwnership(userId, geofeedId)
+    if (!geofeed) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
 
     const ranges = await prisma.ipRange.findMany({
@@ -55,27 +56,25 @@ export async function POST(
   { params }: { params: Promise<{ geofeedId: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session = await getRouteHandlerSession()
     if (!session) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { geofeedId } = await params
     const userId = session.user.id
+    const { geofeedId } = await params
+    if (!geofeedId) {
+      return NextResponse.json({ success: false, error: 'Invalid geofeed id' }, { status: 400 })
+    }
 
-    // Verify the geofeed belongs to the user
-    const geofeed = await prisma.geofeedFile.findUnique({
-      where: { id: geofeedId },
-    })
-
-    if (!geofeed || geofeed.userId !== userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
+    const geofeed = await verifyGeofeedOwnership(userId, geofeedId)
+    if (!geofeed) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
 
     const body = await request.json()
     const { network, countryCode, subdivision, city, postalCode } = body
 
-    // Validate required fields
     if (!network || !countryCode) {
       return NextResponse.json(
         { success: false, error: 'Network and country code are required' },

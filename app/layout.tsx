@@ -19,36 +19,53 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body>
-        <nav className="border-b border-gray-300 bg-white shadow">
-          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-8">
-                <Link href="/geo" className="text-xl font-bold text-gray-900 no-underline">
-                  Geofeed Manager
+      <body className="min-h-screen">
+        <nav className="sticky top-0 z-40 border-b border-white/70 bg-white/70 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-8">
+              <Link
+                href="/"
+                className="text-xl font-semibold text-gray-900 no-underline"
+              >
+                Geofeed Manager
+              </Link>
+              {user && (
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700 hover:text-emerald-900"
+                >
+                  Dashboard
                 </Link>
-                {user && (
-                  <Link href="/geo/dashboard" className="text-blue-600 hover:text-blue-800">
-                    Dashboard
-                  </Link>
-                )}
-              </div>
-              <div className="flex items-center gap-4">
-                {user ? (
-                  <>
-                    <span className="text-sm text-gray-600">{user.email}</span>
-                    <LogoutButton />
-                  </>
-                ) : (
-                  <Link href="/geo/login" className="text-blue-600 hover:text-blue-800">
-                    Login
-                  </Link>
-                )}
-              </div>
+              )}
+              {user && (
+                <Link
+                  href="/help"
+                  className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700 hover:text-emerald-900"
+                >
+                  Help
+                </Link>
+              )}
+            </div>
+            <div className="flex items-center gap-4">
+              {user ? (
+                <>
+                  <span className="hidden text-sm text-gray-600 sm:inline">
+                    {user.email}
+                  </span>
+                  <LogoutButton />
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="rounded-full border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-800 hover:border-emerald-400 hover:text-emerald-900"
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </nav>
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           {children}
         </main>
       </body>

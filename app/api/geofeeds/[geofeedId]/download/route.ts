@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
-import fs from 'fs/promises'
-import path from 'path'
 
-export async function POST(
+export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ geofeedId: string }> }
 ) {
@@ -16,6 +14,9 @@ export async function POST(
 
     const userId = session.user.id
     const { geofeedId } = await params
+    if (!geofeedId) {
+      return NextResponse.json({ success: false, error: 'Invalid geofeed id' }, { status: 400 })
+    }
 
     const geofeed = await prisma.geofeedFile.findFirst({
       where: { id: geofeedId, userId },
@@ -41,19 +42,20 @@ export async function POST(
     )
 
     const csvContent = csvLines.join('\n')
+    const filename = `geofeed-${geofeedId}.csv`
 
-    const publicDir = path.join(process.cwd(), 'public')
-    await fs.mkdir(publicDir, { recursive: true })
-
-    const filePath = path.join(publicDir, `geofeed-${geofeedId}.csv`)
-    await fs.writeFile(filePath, csvContent, 'utf-8')
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-    const url = `${baseUrl}/geo/geofeed-${geofeedId}.csv`
-
-    return NextResponse.json({ success: true, url, recordCount: ranges.length })
+    return new NextResponse(csvContent, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    })
   } catch (error) {
-    console.error('Error generating geofeed:', error)
-    return NextResponse.json({ success: false, error: 'Failed to generate geofeed' }, { status: 500 })
+    console.error('Error downloading geofeed:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to download geofeed' },
+      { status: 500 }
+    )
   }
 }

@@ -29,7 +29,19 @@ cd ~
 unzip Geofeed-Manager-Deploy_20251226_162238.zip
 ```
 
-### 2. Create Node.js Application in cPanel
+### 2. Install Dependencies
+
+**Important**: The deployment package does NOT include `node_modules` - cPanel will create them itself.
+
+**Via SSH:**
+```bash
+cd ~/Geofeed-Manager-Deploy_20251226_162238
+npm install --production
+```
+
+This installs only production dependencies (removes dev dependencies). Wait for it to complete.
+
+### 3. Create Node.js Application in cPanel
 
 1. Log into **cPanel**
 2. Find and click **Node.js Application Manager** (or **Setup Node.js App**)
@@ -47,7 +59,7 @@ unzip Geofeed-Manager-Deploy_20251226_162238.zip
 
 5. Click **Create**
 
-### 3. Create Startup Script
+### 4. Create Startup Script
 
 cPanel will create a `server.js` file. Edit it to start your Next.js app:
 
@@ -84,7 +96,7 @@ EOF
 chmod +x server.js
 ```
 
-### 4. Set Environment Variables
+### 5. Set Environment Variables
 
 Create `.env.local` in the app root with your Supabase credentials:
 
@@ -109,7 +121,7 @@ NEXT_PUBLIC_BASE_URL=https://ripe.ir
 EOF
 ```
 
-### 5. Create SQLite Database Directory
+### 6. Create SQLite Database Directory
 
 ```bash
 cd ~/Geofeed-Manager-Deploy_20251226_162238
@@ -119,7 +131,7 @@ touch data/geo.db
 chmod 644 data/geo.db
 ```
 
-### 6. Configure Apache Reverse Proxy
+### 7. Configure Apache Reverse Proxy
 
 cPanel will automatically set up a reverse proxy. Verify in **EasyApache Configuration** that the app is accessible.
 
@@ -128,7 +140,7 @@ cPanel will automatically set up a reverse proxy. Verify in **EasyApache Configu
 - The `/geo` basePath is configured in `next.config.ts`
 - Access your app at: `https://ripe.ir/geo`
 
-### 7. Start the Application
+### 8. Start the Application
 
 **Via cPanel Node.js Manager:**
 1. Return to **Node.js Application Manager**
@@ -142,7 +154,7 @@ cd ~/Geofeed-Manager-Deploy_20251226_162238
 npm start
 ```
 
-### 8. Verify Deployment
+### 9. Verify Deployment
 
 1. **Check application status** in cPanel Node.js Manager (should show "Running")
 2. **Test the app**: Visit `https://your-domain.com/geo` in your browser
@@ -181,30 +193,35 @@ The app uses `basePath="/geo"` and `assetPrefix="/geo"` configured in `next.conf
 
 ## File Structure on Server
 
+After `npm install`, your directory will look like:
+
 ```
 ~/Geofeed-Manager-Deploy_20251226_162238/
 ├── .next/                    # Pre-built Next.js application
 │   ├── standalone/           # Standalone server
 │   ├── static/               # Static assets
 │   └── server/               # Server-side code
-├── node_modules/             # Production dependencies
+├── node_modules/             # Created by npm install on server
 ├── prisma/                   # Database schema reference
 ├── data/                     # SQLite database directory
-│   └── geo.db               # Database file
+│   └── geo.db               # Database file (created manually)
 ├── .env.local               # Environment variables (create this!)
 ├── package.json             # Dependencies manifest
 ├── package-lock.json        # Dependency lock file
-└── server.js                # Application startup script
+└── server.js                # Application startup script (create this!)
 ```
+
+**Note**: `node_modules` is created by running `npm install` on the server, not included in the deployment package.
 
 ## Maintenance
 
 ### Update Application
 1. Download new deployment package
 2. Upload and extract to new folder
-3. Create new Node.js app in cPanel pointing to new folder
-4. Stop old app, start new app
-5. Delete old folder after verifying new app works
+3. Run `npm install --production` in the new folder
+4. Create new Node.js app in cPanel pointing to new folder
+5. Stop old app, start new app
+6. Delete old folder after verifying new app works
 
 ### Backup Database
 ```bash

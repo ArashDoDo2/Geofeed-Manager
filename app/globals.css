@@ -1,17 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg: #f4f1ea;
+  --panel: #ffffff;
+  --ink: #111827;
+  --muted: #6b7280;
+  --accent: #0f766e;
+  --accent-2: #f59e0b;
+  --border: #e7e1d6;
+  --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-gray-50 text-gray-900;
+  font-family: 'Space Grotesk', 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(245, 158, 11, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(15, 118, 110, 0.18), transparent 40%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Syne', 'Space Grotesk', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 a {
-  @apply text-blue-600 hover:text-blue-800 underline;
+  @apply text-emerald-700 hover:text-emerald-900;
 }
 
 button {
@@ -21,22 +55,41 @@ button {
 input,
 select,
 textarea {
-  @apply rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+  @apply rounded-xl border border-[color:var(--border)] bg-white/70 px-4 py-2 text-gray-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200;
 }
 
 table {
-  @apply w-full border-collapse border border-gray-300;
+  @apply w-full border-separate border-spacing-0;
 }
 
 th,
 td {
-  @apply border border-gray-300 px-4 py-2 text-left;
+  @apply px-4 py-3 text-left;
 }
 
-th {
-  @apply bg-gray-200 font-semibold;
+thead th {
+  @apply border-b border-[color:var(--border)] bg-white/80 text-xs uppercase tracking-[0.2em] text-gray-500;
 }
 
-tr:nth-child(even) {
-  @apply bg-gray-100;
+tbody tr {
+  @apply border-b border-[color:var(--border)] bg-white/80;
+}
+
+tbody tr:last-child {
+  @apply border-b-0;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast {
+  animation: toast-in 180ms ease-out;
 }

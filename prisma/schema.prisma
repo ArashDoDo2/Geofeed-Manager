@@ -7,35 +7,30 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:../data/geo.db"
+  url      = env("DATABASE_URL")
 }
 
 model GeofeedFile {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   ranges    IpRange[]
-
-  @@index([userId])
 }
 
 model IpRange {
-  id           String   @id @default(cuid())
-  geofeedId    String
-  userId       String
-  network      String
-  countryCode  String
-  subdivision  String?
-  city         String?
-  postalCode   String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  geofeedId   String
+  userId      String
+  network     String
+  countryCode String
+  subdivision String?
+  city        String?
+  postalCode  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  geofeed      GeofeedFile @relation(fields: [geofeedId], references: [id], onDelete: Cascade)
-
-  @@index([geofeedId])
-  @@index([userId])
+  geofeed     GeofeedFile @relation(fields: [geofeedId], references: [id], onDelete: Cascade)
 }
