@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { FilePlus, Loader2, PlusCircle, RefreshCw, Trash2 } from 'lucide-react'
 
 interface GeofeedFile {
   id: string
@@ -116,17 +117,25 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading) return <div className="text-center text-gray-600">Loading...</div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 text-gray-600">
+        <Loader2 className="h-5 w-5 animate-spin" /> Loading...
+      </div>
+    )
+  }
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Geofeeds</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold text-gray-900">
+          <FilePlus className="h-7 w-7 text-blue-600" /> Geofeeds
+        </h1>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+          className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
         >
-          Create New Geofeed
+          <PlusCircle className="h-5 w-5" /> Create New Geofeed
         </button>
       </div>
 
@@ -169,16 +178,24 @@ export default function DashboardPage() {
             <button
               type="submit"
               disabled={creatingGeofeed || !newName.trim()}
-              className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+              className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {creatingGeofeed ? 'Creating...' : 'Create'}
+              {creatingGeofeed ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Creating...
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="h-4 w-4" /> Create
+                </>
+              )}
             </button>
             <button
               type="button"
               onClick={() => setShowCreateForm(false)}
-              className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
+              className="flex items-center gap-2 rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
             >
-              Cancel
+              <RefreshCw className="h-4 w-4" /> Cancel
             </button>
           </div>
         </form>
@@ -204,7 +221,7 @@ export default function DashboardPage() {
                   <td>{new Date(geofeed.createdAt).toLocaleDateString()}</td>
                   <td>{geofeed._count?.ranges || 0}</td>
                   <td>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => router.push(`/geo/dashboard/${geofeed.id}`)}
                         className="text-sm text-blue-600 hover:text-blue-800"
@@ -214,15 +231,21 @@ export default function DashboardPage() {
                       <button
                         onClick={() => handleGenerateGeofeed(geofeed.id)}
                         disabled={generatingId === geofeed.id}
-                        className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
                       >
-                        {generatingId === geofeed.id ? 'Generating...' : 'Generate'}
+                        {generatingId === geofeed.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" /> Generating...
+                          </>
+                        ) : (
+                          'Generate'
+                        )}
                       </button>
                       <button
                         onClick={() => handleDeleteGeofeed(geofeed.id)}
-                        className="text-sm text-red-600 hover:text-red-800"
+                        className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800"
                       >
-                        Delete
+                        <Trash2 className="h-4 w-4" /> Delete
                       </button>
                     </div>
                   </td>

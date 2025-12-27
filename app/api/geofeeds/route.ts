@@ -1,6 +1,6 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getSession } from '@/lib/supabase-server'
-import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -13,9 +13,7 @@ export async function GET() {
     const geofeeds = await prisma.geofeedFile.findMany({
       where: { userId },
       include: {
-        _count: {
-          select: { ranges: true },
-        },
+        _count: { select: { ranges: true } },
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -37,7 +35,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
     const { name } = await request.json()
 
     if (!name || typeof name !== 'string' || !name.trim()) {
@@ -49,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     const geofeed = await prisma.geofeedFile.create({
       data: {
-        userId,
+        userId: session.user.id,
         name: name.trim(),
       },
     })

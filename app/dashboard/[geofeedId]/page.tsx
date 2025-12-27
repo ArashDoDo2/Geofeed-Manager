@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { Download, FileSpreadsheet, Pencil, Plus, Trash2 } from 'lucide-react'
 
 interface IpRange {
   id: string
@@ -74,7 +75,7 @@ export default function GeofeedDetailPage() {
 
     try {
       setError(null)
-      const method = editingId ? 'PUT' : 'POST'
+      const method = editingId ? 'PATCH' : 'POST'
       const url = editingId
         ? `/geo/api/geofeeds/${geofeedId}/ranges/${editingId}`
         : `/geo/api/geofeeds/${geofeedId}/ranges`
@@ -170,11 +171,13 @@ export default function GeofeedDetailPage() {
         ← Back
       </button>
 
-      <h1 className="mb-2 text-3xl font-bold text-gray-900">{geofeed?.name}</h1>
+      <h1 className="mb-2 flex items-center gap-2 text-3xl font-bold text-gray-900">
+        <FileSpreadsheet className="h-7 w-7 text-blue-600" /> {geofeed?.name}
+      </h1>
       {generatingUrl && generatingUrl !== 'generating' && (
         <p className="mb-4 text-green-600">
-          <a href={generatingUrl} target="_blank" rel="noopener noreferrer">
-            📥 Download CSV
+          <a href={generatingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2">
+            <Download className="h-4 w-4" /> Download CSV
           </a>
         </p>
       )}
@@ -198,14 +201,14 @@ export default function GeofeedDetailPage() {
             setEditingId(null)
             setShowForm(!showForm)
           }}
-          className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+          className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
         >
-          Add IP Range
+          <Plus className="h-4 w-4" /> Add IP Range
         </button>
         <button
           onClick={handleGenerate}
           disabled={generatingUrl === 'generating'}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {generatingUrl === 'generating' ? 'Generating...' : 'Generate Geofeed'}
         </button>
@@ -277,7 +280,7 @@ export default function GeofeedDetailPage() {
           <div className="mt-4 flex gap-2">
             <button
               type="submit"
-              className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+              className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
             >
               {editingId ? 'Update' : 'Add'}
             </button>
@@ -287,7 +290,7 @@ export default function GeofeedDetailPage() {
                 setShowForm(false)
                 setEditingId(null)
               }}
-              className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
+              className="flex items-center gap-2 rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
             >
               Cancel
             </button>
@@ -322,15 +325,15 @@ export default function GeofeedDetailPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(range)}
-                        className="text-sm text-blue-600 hover:text-blue-800"
+                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                       >
-                        Edit
+                        <Pencil className="h-4 w-4" /> Edit
                       </button>
                       <button
                         onClick={() => handleDelete(range.id)}
-                        className="text-sm text-red-600 hover:text-red-800"
+                        className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800"
                       >
-                        Delete
+                        <Trash2 className="h-4 w-4" /> Delete
                       </button>
                     </div>
                   </td>

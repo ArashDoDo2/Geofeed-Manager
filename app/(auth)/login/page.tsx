@@ -1,6 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabase-client'
+import { LogIn } from 'lucide-react'
 import { useState } from 'react'
 
 export default function LoginPage() {
@@ -48,8 +49,9 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="w-full rounded bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
+          <LogIn className="h-5 w-5" />
           {isLoading ? 'Signing in...' : 'Sign in with Google'}
         </button>
       </div>

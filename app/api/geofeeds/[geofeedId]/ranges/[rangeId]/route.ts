@@ -1,21 +1,25 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getSession } from '@/lib/supabase-server'
-import { NextRequest, NextResponse } from 'next/server'
 
-// Simple CIDR validation
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$|^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\/\d{1,3}$/
   return cidrRegex.test(cidr.trim())
 }
 
-// Simple country code validation (2-letter ISO 3166-1)
 function isValidCountryCode(code: string): boolean {
   return /^[A-Z]{2}$/.test(code.trim())
 }
 
-export async function PUT(
+async function verifyOwnership(userId: string, geofeedId: string, rangeId: string) {
+  return prisma.ipRange.findFirst({
+    where: { id: rangeId, geofeedId, userId },
+  })
+}
+
+export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ geofeedId: string; rangeId: string }> }
+  { params }: { params: { geofeedId: string; rangeId: string } }
 ) {
   try {
     const session = await getSession()
@@ -23,22 +27,16 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { geofeedId, rangeId } = await params
     const userId = session.user.id
+    const { geofeedId, rangeId } = params
 
-    // Verify ownership
-    const range = await prisma.ipRange.findUnique({
-      where: { id: rangeId },
-    })
-
-    if (!range || range.userId !== userId || range.geofeedId !== geofeedId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
+    const range = await verifyOwnership(userId, geofeedId, rangeId)
+    if (!range) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
 
-    const body = await request.json()
-    const { network, countryCode, subdivision, city, postalCode } = body
+    const { network, countryCode, subdivision, city, postalCode } = await request.json()
 
-    // Validate required fields
     if (!network || !countryCode) {
       return NextResponse.json(
         { success: false, error: 'Network and country code are required' },
@@ -60,8 +58,8 @@ export async function PUT(
       )
     }
 
-    const updatedRange = await prisma.ipRange.update({
-      where: { id: rangeId },
+    await prisma.ipRange.updateMany({
+      where: { id: rangeId, geofeedId, userId },
       data: {
         network: network.trim(),
         countryCode: countryCode.trim().toUpperCase(),
@@ -71,7 +69,9 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json({ success: true, data: updatedRange })
+    const updated = await verifyOwnership(userId, geofeedId, rangeId)
+
+    return NextResponse.json({ success: true, data: updated })
   } catch (error) {
     console.error('Error updating range:', error)
     return NextResponse.json(
@@ -83,7 +83,7 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ geofeedId: string; rangeId: string }> }
+  { params }: { params: { geofeedId: string; rangeId: string } }
 ) {
   try {
     const session = await getSession()
@@ -91,21 +91,15 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { geofeedId, rangeId } = await params
     const userId = session.user.id
+    const { geofeedId, rangeId } = params
 
-    // Verify ownership
-    const range = await prisma.ipRange.findUnique({
-      where: { id: rangeId },
-    })
-
-    if (!range || range.userId !== userId || range.geofeedId !== geofeedId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
+    const range = await verifyOwnership(userId, geofeedId, rangeId)
+    if (!range) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
 
-    await prisma.ipRange.delete({
-      where: { id: rangeId },
-    })
+    await prisma.ipRange.deleteMany({ where: { id: rangeId, geofeedId, userId } })
 
     return NextResponse.json({ success: true, data: { id: rangeId } })
   } catch (error) {
