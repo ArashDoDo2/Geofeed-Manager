@@ -97,3 +97,10 @@ next.config.ts
 
 See `CPANEL_DEPLOYMENT.md` and `CPANEL_QUICK_START.md`.
 
+## cPanel Quick Checklist
+
+- Upload the built output (include `.next/BUILD_ID`, `.next/server/`, `.next/static/`).
+- Ensure `server.js` exists at app root (wrapper entrypoint).
+- Set startup file to `server.js` in cPanel.
+- Run NPM Install (unless using a package with bundled `node_modules`).
+- Set Supabase redirect URL: `https://your-domain.com/geo/auth/callback`.
