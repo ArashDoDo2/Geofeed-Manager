@@ -69,7 +69,6 @@ export default function DashboardPage() {
   const [importRanges, setImportRanges] = useState<ExistingRange[]>([])
   const [importing, setImporting] = useState(false)
   const [importSource, setImportSource] = useState<'file' | 'url'>('file')
-  const [importFile, setImportFile] = useState<File | null>(null)
   const [importUrl, setImportUrl] = useState('')
   const [importRows, setImportRows] = useState<ImportRow[]>([])
   const [selectAllValid, setSelectAllValid] = useState(false)
@@ -240,11 +239,11 @@ export default function DashboardPage() {
   const isValidCountryCode = (code: string) => /^[A-Z]{2}$/.test(code.trim())
 
   const normalizeKey = (row: {
-    network?: string
-    countryCode?: string
-    subdivision?: string
-    city?: string
-    postalCode?: string
+    network?: string | null
+    countryCode?: string | null
+    subdivision?: string | null
+    city?: string | null
+    postalCode?: string | null
   }) =>
     [
       (row.network || '').trim(),
@@ -338,7 +337,6 @@ export default function DashboardPage() {
   }
 
   const handleImportFileChange = async (file: File | null) => {
-    setImportFile(file)
     setImportSummary(null)
     if (file) {
       await parseImportText(await file.text())
@@ -440,7 +438,6 @@ export default function DashboardPage() {
       setImportSummary(
         `Imported ${data.importedCount} ranges${skippedNote}${conflictNote}`
       )
-      setImportFile(null)
       setImportUrl('')
       setImportRows([])
       setSelectAllValid(false)
@@ -469,7 +466,6 @@ export default function DashboardPage() {
     setImportCommitted(false)
     setImportGeofeedId('')
     setImportNewName('')
-    setImportFile(null)
     setImportUrl('')
     setImportRows([])
     setSelectAllValid(false)

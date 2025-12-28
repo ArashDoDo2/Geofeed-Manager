@@ -6,8 +6,11 @@ import { cookies } from 'next/headers'
 
 export async function createSupabaseServerComponentClient() {
   const cookieStore = await cookies()
+  const cookieAdapter = {
+    cookies: () => cookieStore,
+  } as unknown as { cookies: () => Promise<typeof cookieStore> }
   return {
-    client: createServerComponentClient({ cookies: () => cookieStore }),
+    client: createServerComponentClient(cookieAdapter),
     cookieStore,
   }
 }
@@ -39,8 +42,11 @@ export async function getSession() {
 
 export async function createSupabaseRouteHandlerClient() {
   const cookieStore = await cookies()
+  const cookieAdapter = {
+    cookies: () => cookieStore,
+  } as unknown as { cookies: () => Promise<typeof cookieStore> }
   return {
-    client: createRouteHandlerClient({ cookies: () => cookieStore }),
+    client: createRouteHandlerClient(cookieAdapter),
     cookieStore,
   }
 }

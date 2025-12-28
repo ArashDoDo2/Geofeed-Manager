@@ -59,6 +59,7 @@ In **Setup Node.js App**:
 - **Application URL**: your domain plus `/geo`
 - **Startup file**: `.next/standalone/server.js`
 - **Node.js version**: 22 LTS or newer
+- **Application mode**: Production (sets `NODE_ENV=production`)
 
 Save and start the application.
 

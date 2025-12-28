@@ -47,7 +47,6 @@ export default function GeofeedDetailPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [generatingUrl, setGeneratingUrl] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
-  const [importFile, setImportFile] = useState<File | null>(null)
   const [importRows, setImportRows] = useState<ImportRow[]>([])
   const [importSummary, setImportSummary] = useState<string | null>(null)
   const [selectAllValid, setSelectAllValid] = useState(false)
@@ -360,7 +359,6 @@ export default function GeofeedDetailPage() {
   }
 
   const handleImportFileChange = async (file: File | null) => {
-    setImportFile(file)
     setImportSummary(null)
     if (file) {
       await parseImportText(await file.text())
@@ -461,7 +459,6 @@ export default function GeofeedDetailPage() {
       setImportSummary(
         `Imported ${data.importedCount} ranges${skippedNote}${conflictNote}`
       )
-      setImportFile(null)
       setImportUrl('')
       setImportRows([])
       setSelectAllValid(false)
