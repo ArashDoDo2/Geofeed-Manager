@@ -1,21 +1,22 @@
-# cPanel Deployment Guide
+# cPanel Deployment Guide (No SSH)
+
+This guide assumes you only have access to cPanel File Manager and the **Setup Node.js App** interface.
 
 ## Requirements
 
 - cPanel with Node.js support (Node.js 22 LTS or newer)
-- SSH access recommended
 - Domain or subdomain for `/geo`
 
-## Build Locally
+## 1) Build Locally
 
 ```bash
 npm install
 npm run build
 ```
 
-## Upload to Server
+## 2) Upload to Server (File Manager)
 
-Upload these folders/files to your app root:
+Upload these folders/files into your application root:
 
 - `.next/standalone`
 - `.next/static`
@@ -25,9 +26,23 @@ Upload these folders/files to your app root:
 - `package-lock.json`
 - `next.config.ts`
 
-## Configure Environment
+Tip: Zip them locally, upload once, then use **Extract** in File Manager.
 
-Create `.env` in the app root:
+## 3) Create the Database Folder
+
+In File Manager:
+
+1. Create a folder named `data` in the app root.
+2. Ensure the folder is writable (755 is typical).
+
+If you cannot run migrations on the server, **upload a pre-migrated SQLite DB** from your local machine:
+
+- Run `npm run prisma:migrate` locally.
+- Upload `data/geo.db` into the server `data/` folder.
+
+## 4) Configure Environment Variables
+
+Create a file named `.env` in the app root using File Manager:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -36,45 +51,24 @@ NEXT_PUBLIC_BASE_URL=https://your-domain.com
 DATABASE_URL="file:./data/geo.db"
 ```
 
-## Prepare Database Folder
+## 5) Create the Node.js App in cPanel
 
-```bash
-mkdir -p data
-chmod 755 data
-```
+In **Setup Node.js App**:
 
-## Run Migrations (first deploy)
+- **Application root**: your app folder
+- **Application URL**: your domain plus `/geo`
+- **Startup file**: `.next/standalone/server.js`
+- **Node.js version**: 22 LTS or newer
 
-If you need to run migrations on the server, install deps and run:
+Save and start the application.
 
-```bash
-npm install
-npx prisma migrate deploy
-```
-
-If you prefer, run migrations locally and upload `data/geo.db` to the server once.
-
-## Start App
-
-Set the startup file in cPanel to:
-
-```
-.next/standalone/server.js
-```
-
-Or from SSH:
-
-```bash
-node .next/standalone/server.js
-```
-
-## Verify
+## 6) Verify
 
 Visit: `https://your-domain.com/geo`
 
 ## Troubleshooting
 
-- Ensure `.env` is present and correct
-- Check cPanel Node.js logs for startup errors
-- Confirm base path `/geo` in URLs
-
+- Ensure `.env` exists in the app root.
+- Confirm the `data/` folder exists and is writable.
+- Check **Node.js App logs** in cPanel for startup errors.
+- Ensure the base path `/geo` is used for all URLs.
