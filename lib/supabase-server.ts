@@ -1,23 +1,54 @@
-import {
-  createRouteHandlerClient,
-  createServerComponentClient,
-} from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createSupabaseServerComponentClient() {
+function getSupabaseCredentials() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase environment variables are not set')
+  }
+
+  return { supabaseUrl, supabaseAnonKey }
+}
+
+async function createCookieAwareServerClient() {
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseCredentials()
   const cookieStore = await cookies()
-  const cookieAdapter = {
-    cookies: () => cookieStore,
-  } as unknown as { cookies: () => Promise<typeof cookieStore> }
+
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name) {
+        return cookieStore.get(name)?.value
+      },
+      set(name, value, options) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch {
+          // The cookies instance can be immutable in some contexts (e.g. middleware)
+        }
+      },
+      remove(name, options) {
+        try {
+          cookieStore.set({ name, value: '', ...options })
+        } catch {
+          // The cookies instance can be immutable in some contexts (e.g. middleware)
+        }
+      },
+    },
+  })
+
+  return { supabase, cookieStore }
+}
+
+export async function createSupabaseServerComponentClient() {
   return {
-    client: createServerComponentClient(cookieAdapter),
-    cookieStore,
+    ...(await createCookieAwareServerClient()),
   }
 }
 
 export async function getSession() {
-  const { client: supabase, cookieStore } =
-    await createSupabaseServerComponentClient()
+  const { supabase, cookieStore } = await createCookieAwareServerClient()
   const hasAuthCookie = cookieStore
     .getAll()
     .some((cookie) => cookie.name.startsWith('sb-'))
@@ -41,19 +72,13 @@ export async function getSession() {
 }
 
 export async function createSupabaseRouteHandlerClient() {
-  const cookieStore = await cookies()
-  const cookieAdapter = {
-    cookies: () => cookieStore,
-  } as unknown as { cookies: () => Promise<typeof cookieStore> }
   return {
-    client: createRouteHandlerClient(cookieAdapter),
-    cookieStore,
+    ...(await createCookieAwareServerClient()),
   }
 }
 
 export async function getRouteHandlerSession() {
-  const { client: supabase, cookieStore } =
-    await createSupabaseRouteHandlerClient()
+  const { supabase, cookieStore } = await createCookieAwareServerClient()
   const hasAuthCookie = cookieStore
     .getAll()
     .some((cookie) => cookie.name.startsWith('sb-'))

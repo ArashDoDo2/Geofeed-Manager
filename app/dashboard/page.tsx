@@ -89,6 +89,13 @@ export default function DashboardPage() {
     return () => clearTimeout(timeoutId)
   }, [publishNotice])
 
+  const formatGeofeedNotice = (geofeed?: GeofeedFile | null) => {
+    if (geofeed?.name) {
+      return `Geofeed "${geofeed.name}"`
+    }
+    return 'Geofeed'
+  }
+
   const fetchGeofeeds = async () => {
     try {
       setLoading(true)
@@ -157,11 +164,13 @@ export default function DashboardPage() {
     }
   }
 
-  const handleGenerateGeofeed = async (id: string) => {
+  const handleGenerateGeofeed = async (geofeed: GeofeedFile) => {
     try {
-      setGeneratingId(id)
+      setGeneratingId(geofeed.id)
       setError(null)
-      const res = await fetch(`/geo/api/geofeeds/${id}/generate`, { method: 'POST' })
+      const res = await fetch(`/geo/api/geofeeds/${geofeed.id}/generate`, {
+        method: 'POST',
+      })
       const data = await res.json()
 
       if (!data.success) {
@@ -169,7 +178,7 @@ export default function DashboardPage() {
         return
       }
 
-      setPublishNotice('Geofeed published.')
+      setPublishNotice(`${formatGeofeedNotice(geofeed)} is now published.`)
       await fetchGeofeeds()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -497,13 +506,15 @@ export default function DashboardPage() {
     window.location.href = `/geo/api/geofeeds/${id}/download`
   }
 
-  const handleUnpublishGeofeed = async (id: string) => {
+  const handleUnpublishGeofeed = async (geofeed: GeofeedFile) => {
     if (!confirm('Unpublish this geofeed file from the public URL?')) return
 
     try {
-      setUnpublishingId(id)
+      setUnpublishingId(geofeed.id)
       setError(null)
-      const res = await fetch(`/geo/api/geofeeds/${id}/unpublish`, { method: 'POST' })
+      const res = await fetch(`/geo/api/geofeeds/${geofeed.id}/unpublish`, {
+        method: 'POST',
+      })
       const data = await res.json()
 
       if (!data.success) {
@@ -511,6 +522,7 @@ export default function DashboardPage() {
         return
       }
 
+      setPublishNotice(`${formatGeofeedNotice(geofeed)} is now unpublished.`)
       await fetchGeofeeds()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -521,10 +533,10 @@ export default function DashboardPage() {
 
   const handleTogglePublish = async (geofeed: GeofeedFile) => {
     if (geofeed.publishedUrl) {
-      await handleUnpublishGeofeed(geofeed.id)
+      await handleUnpublishGeofeed(geofeed)
       return
     }
-    await handleGenerateGeofeed(geofeed.id)
+    await handleGenerateGeofeed(geofeed)
   }
 
   if (loading) {
