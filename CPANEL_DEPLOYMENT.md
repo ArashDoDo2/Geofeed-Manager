@@ -28,8 +28,15 @@ Upload the **built output**, not source files. Your app root should contain:
 - `next.config.ts`
 - `.env` (optional; see Env section)
 
-Tip: Zip locally, upload once, then **Extract** in File Manager. If extraction fails,
-upload the folders **manually** (especially `.next/`).
+Tip: Use **split packages** to avoid cPanel extraction issues:
+
+1) **core.zip** (small):
+   - `public/`, `prisma/`, `data/geo.db`, `package.json`, `package-lock.json`,
+     `next.config.ts`, `.env`, `server.js`
+2) **next.zip** (only `.next/`):
+   - `.next/BUILD_ID`, `.next/server/`, `.next/static/`, manifest files
+
+Upload/extract **core.zip first**, then **next.zip** into the same app root.
 
 ## 3) Database
 
@@ -73,6 +80,25 @@ Save and start the application.
 If your hosting allows it, click **Run NPM Install**.  
 If you cannot run npm due to resource limits, use a package that already includes
 `node_modules`.
+
+## 7) Permissions (If Things Break)
+
+cPanel sometimes preserves zip permissions. If you see missing files or 403 errors:
+
+```bash
+# Fix perms (run from app root)
+find .next -type d -exec chmod 755 {} +
+find .next -type f -exec chmod 644 {} +
+chmod 775 data
+chmod 664 data/geo.db
+```
+
+If you get **Permission denied** on `.next/server/app/(auth)` paths, quote the folder:
+
+```bash
+find ".next/server/app/(auth)" -type d -exec chmod 755 {} +
+find ".next/server/app/(auth)" -type f -exec chmod 644 {} +
+```
 
 ## 7) Supabase Redirects
 

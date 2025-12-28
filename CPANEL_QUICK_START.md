@@ -8,14 +8,11 @@ npm run build
 
 ## 2) Upload to server
 
-Upload:
-- `.next/standalone`
-- `.next/static`
-- `public`
-- `prisma`
-- `package.json`
-- `package-lock.json`
-- `next.config.ts`
+Upload **two small zips** to avoid cPanel extraction issues:
+
+1) **core.zip**: `public/`, `prisma/`, `data/geo.db`, `package.json`,
+   `package-lock.json`, `next.config.ts`, `.env`, `server.js`
+2) **next.zip**: `.next/` only (must include `BUILD_ID`, `server/`, `static/`)
 
 ## 3) Create `.env`
 ```env
@@ -41,8 +38,16 @@ npx prisma migrate deploy
 
 Startup file:
 ```
-.next/standalone/server.js
+server.js
 ```
 
 Open: `https://your-domain.com/geo`
 
+## Permissions (if needed)
+
+```bash
+find .next -type d -exec chmod 755 {} +
+find .next -type f -exec chmod 644 {} +
+chmod 775 data
+chmod 664 data/geo.db
+```
