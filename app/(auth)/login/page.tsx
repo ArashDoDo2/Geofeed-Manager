@@ -37,7 +37,6 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-6 py-12">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.18),_transparent_50%),radial-gradient(circle_at_bottom,_rgba(245,158,11,0.18),_transparent_45%)]" />
       <div className="w-full max-w-md rounded-3xl border border-white/70 bg-white/80 p-8 shadow-[var(--shadow)] backdrop-blur">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-700/70">
           Secure access

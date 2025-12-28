@@ -553,13 +553,13 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setShowImportPanel(!showImportPanel)}
-            className="flex items-center gap-2 rounded-full border border-emerald-200 px-5 py-2.5 text-sm font-semibold text-emerald-800 hover:border-emerald-400"
+            className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-5 py-2.5 text-sm font-semibold text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400"
           >
             <UploadCloud className="h-4 w-4" /> Import
           </button>
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
+            className="flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800"
           >
             <PlusCircle className="h-5 w-5" /> Create New Geofeed
           </button>
@@ -591,7 +591,7 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={handleCancelImport}
-              className="text-sm font-semibold text-gray-500 hover:text-gray-700"
+              className="rounded-full border border-gray-300 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-600 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-400"
             >
               Close
             </button>
@@ -915,13 +915,13 @@ export default function DashboardPage() {
                         <>
                           <button
                             onClick={() => handleContinueDraftImport(geofeed.id)}
-                            className="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+                            className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400"
                           >
                             <UploadCloud className="h-4 w-4" /> Continue Import
                           </button>
                           <button
                             onClick={() => handleDeleteGeofeed(geofeed.id)}
-                            className="flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-red-700"
+                            className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:border-red-300"
                           >
                             <Trash2 className="h-4 w-4" /> Delete Draft
                           </button>

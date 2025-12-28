@@ -485,7 +485,7 @@ export default function GeofeedDetailPage() {
     <div className="space-y-6">
       <button
         onClick={() => router.back()}
-        className="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+        className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-sm transition hover:border-emerald-400"
       >
         Back to list
       </button>
@@ -530,14 +530,14 @@ export default function GeofeedDetailPage() {
             setEditingId(null)
             setShowForm(!showForm)
           }}
-          className="flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+          className="flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800"
         >
           <Plus className="h-4 w-4" /> Add IP Range
         </button>
         <button
           onClick={handleGenerate}
           disabled={generatingUrl === 'generating'}
-          className="flex items-center gap-2 rounded-full border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-800 hover:border-emerald-400 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 disabled:opacity-50"
         >
           {generatingUrl === 'generating' ? 'Generating...' : 'Generate Geofeed'}
         </button>
@@ -545,7 +545,7 @@ export default function GeofeedDetailPage() {
           <button
             onClick={handleDeleteSelected}
             disabled={selectedRangeIds.size === 0}
-            className="flex items-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:border-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:border-red-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Delete Selected
           </button>
@@ -563,7 +563,7 @@ export default function GeofeedDetailPage() {
             </p>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1 text-xs font-semibold text-emerald-800">
+            <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm">
               <button
                 type="button"
                 onClick={() => setImportSource('file')}
@@ -600,7 +600,7 @@ export default function GeofeedDetailPage() {
                   type="button"
                   onClick={handleImportUrlPreview}
                   disabled={loadingImportPreview}
-                  className="rounded-full border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-800 hover:border-emerald-400 disabled:opacity-50"
+                  className="rounded-full border border-emerald-200 bg-white/80 px-3 py-2 text-xs font-semibold text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 disabled:opacity-50"
                 >
                   {loadingImportPreview ? 'Loading...' : 'Load'}
                 </button>
@@ -613,7 +613,7 @@ export default function GeofeedDetailPage() {
                 importing ||
                 importRows.filter((row) => row.valid && row.selected).length === 0
               }
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {importing ? 'Importing...' : 'Import'}
             </button>
@@ -772,7 +772,7 @@ export default function GeofeedDetailPage() {
           <div className="mt-4 flex gap-2">
             <button
               type="submit"
-              className="flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+              className="flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800"
             >
               {editingId ? 'Update' : 'Add'}
             </button>
@@ -782,7 +782,7 @@ export default function GeofeedDetailPage() {
                 setShowForm(false)
                 setEditingId(null)
               }}
-              className="flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-400"
+              className="flex items-center gap-2 rounded-full border border-gray-300 bg-white/80 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-400"
             >
               Cancel
             </button>
@@ -830,16 +830,16 @@ export default function GeofeedDetailPage() {
                   <td>{range.city || '-'}</td>
                   <td>{range.postalCode || '-'}</td>
                   <td>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEdit(range)}
-                        className="flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+                        className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400"
                       >
                         <Pencil className="h-4 w-4" /> Edit
                       </button>
                       <button
                         onClick={() => handleDelete(range.id)}
-                        className="flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-red-700"
+                        className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:border-red-300"
                       >
                         <Trash2 className="h-4 w-4" /> Delete
                       </button>

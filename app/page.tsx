@@ -11,8 +11,6 @@ export default async function HomePage() {
 
   return (
     <div className="relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.18),_transparent_55%),radial-gradient(circle_at_bottom_right,_rgba(245,158,11,0.2),_transparent_50%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-10 h-56 w-56 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl" />
       <div className="mx-auto flex min-h-[calc(100vh-120px)] max-w-6xl flex-col justify-center gap-12 px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="relative">
@@ -21,11 +19,11 @@ export default async function HomePage() {
               RFC 8805 geofeed platform
             </div>
             <h1 className="mt-6 text-5xl font-semibold leading-tight text-gray-900 sm:text-6xl">
-              Control your geofeeds, publish with confidence.
+              Control your geofeeds. Publish with confidence, every time.
             </h1>
             <p className="mt-4 text-base text-gray-600">
-              Validate IP ranges, keep metadata consistent, and ship compliant CSVs without
-              the spreadsheet chaos. Built for multi-tenant teams and cPanel hosting.
+              Give your ops team a clean workflow for IP ranges, metadata, and RFC 8805
+              exports. Spend less time fixing CSVs and more time publishing updates with confidence.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
@@ -94,7 +92,7 @@ export default async function HomePage() {
           </div>
         </div>
         <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
-          Next.js • Prisma • SQLite • Supabase Auth
+          Next.js ? Prisma ? SQLite ? Supabase Auth
         </p>
       </div>
     </div>
