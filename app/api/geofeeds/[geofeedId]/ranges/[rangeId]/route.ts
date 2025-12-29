@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$|^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\/\d{1,3}$/
@@ -34,6 +35,11 @@ export async function PATCH(
     if (!range) {
       return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
+
+    const geofeed = await prisma.geofeedFile.findFirst({
+      where: { id: geofeedId, userId },
+      select: { name: true },
+    })
 
     const { network, countryCode, subdivision, city, postalCode } = await request.json()
 
@@ -70,6 +76,20 @@ export async function PATCH(
     })
 
     const updated = await verifyOwnership(userId, geofeedId, rangeId)
+    const updatedNetwork = network.trim()
+    const geofeedName = geofeed?.name || 'Geofeed'
+    const message =
+      range.network === updatedNetwork
+        ? `Updated range ${updatedNetwork} in "${geofeedName}"`
+        : `Updated range ${range.network} to ${updatedNetwork} in "${geofeedName}"`
+
+    await logActivity({
+      userId,
+      action: 'range.update',
+      message,
+      geofeedId,
+      geofeedName,
+    })
 
     return NextResponse.json({ success: true, data: updated })
   } catch (error) {
@@ -98,6 +118,20 @@ export async function DELETE(
     if (!range) {
       return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
+
+    const geofeed = await prisma.geofeedFile.findFirst({
+      where: { id: geofeedId, userId },
+      select: { name: true },
+    })
+
+    const geofeedName = geofeed?.name || 'Geofeed'
+    await logActivity({
+      userId,
+      action: 'range.delete',
+      message: `Deleted range ${range.network} from "${geofeedName}"`,
+      geofeedId,
+      geofeedName,
+    })
 
     await prisma.ipRange.deleteMany({ where: { id: rangeId, geofeedId, userId } })
 

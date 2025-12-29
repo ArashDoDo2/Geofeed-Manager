@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -70,12 +71,23 @@ export async function PATCH(
       )
     }
 
+    const previousName = geofeed.name
+
     await prisma.geofeedFile.updateMany({
       where: { id: geofeedId, userId },
       data: { name: name.trim() },
     })
 
     const updated = await getOwnedGeofeed(userId, geofeedId)
+    const updatedName = updated?.name || name.trim()
+
+    await logActivity({
+      userId,
+      action: 'geofeed.rename',
+      message: `Renamed geofeed "${previousName}" to "${updatedName}"`,
+      geofeedId,
+      geofeedName: updatedName,
+    })
 
     return NextResponse.json({ success: true, data: updated })
   } catch (error) {
@@ -101,6 +113,14 @@ export async function DELETE(
     if (!geofeed) {
       return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
+
+    await logActivity({
+      userId,
+      action: 'geofeed.delete',
+      message: `Deleted geofeed "${geofeed.name}"`,
+      geofeedId,
+      geofeedName: geofeed.name,
+    })
 
     const deleted = await prisma.geofeedFile.deleteMany({ where: { id: geofeedId, userId } })
 

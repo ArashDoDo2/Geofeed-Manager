@@ -1,6 +1,6 @@
 # Geofeed Manager
 
-Multi-tenant web app for managing RFC 8805 geofeed CSVs with Supabase Auth, Prisma, and SQLite. Built on Next.js App Router with `/geo` base path and standalone deployment.
+Multi-tenant web app for managing RFC 8805 geofeed CSVs with Supabase Auth, Prisma, and SQLite. Built on Next.js App Router with `/geo` base path.
 
 ## Requirements
 

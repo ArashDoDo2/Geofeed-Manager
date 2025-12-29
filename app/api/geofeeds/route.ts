@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -74,6 +75,14 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         isDraft: Boolean(isDraft),
       },
+    })
+
+    await logActivity({
+      userId: session.user.id,
+      action: 'geofeed.create',
+      message: `Created geofeed "${geofeed.name}"`,
+      geofeedId: geofeed.id,
+      geofeedName: geofeed.name,
     })
 
     return NextResponse.json({ success: true, data: geofeed }, { status: 201 })

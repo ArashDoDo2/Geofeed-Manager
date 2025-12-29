@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
@@ -51,6 +52,112 @@ interface ExistingRange {
   postalCode?: string | null
 }
 
+interface ActivityLogEntry {
+  id: string
+  action: string
+  message: string
+  createdAt: string
+  geofeedId?: string | null
+  geofeedName?: string | null
+}
+
+const ACTIVITY_TAGS: Record<
+  string,
+  { label: string; classes: string; dot: string }
+> = {
+  'geofeed.create': {
+    label: 'Create',
+    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    dot: 'bg-emerald-500',
+  },
+  'geofeed.publish': {
+    label: 'Publish',
+    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    dot: 'bg-emerald-500',
+  },
+  'geofeed.unpublish': {
+    label: 'Unpublish',
+    classes: 'border-amber-200 bg-amber-50 text-amber-800',
+    dot: 'bg-amber-500',
+  },
+  'geofeed.delete': {
+    label: 'Delete',
+    classes: 'border-red-200 bg-red-50 text-red-700',
+    dot: 'bg-red-500',
+  },
+  'geofeed.rename': {
+    label: 'Rename',
+    classes: 'border-sky-200 bg-sky-50 text-sky-700',
+    dot: 'bg-sky-500',
+  },
+  'geofeed.import': {
+    label: 'Import',
+    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    dot: 'bg-emerald-500',
+  },
+  'geofeed.download': {
+    label: 'Download',
+    classes: 'border-slate-200 bg-slate-50 text-slate-600',
+    dot: 'bg-slate-400',
+  },
+  'range.create': {
+    label: 'Range',
+    classes: 'border-teal-200 bg-teal-50 text-teal-700',
+    dot: 'bg-teal-500',
+  },
+  'range.update': {
+    label: 'Range',
+    classes: 'border-indigo-200 bg-indigo-50 text-indigo-700',
+    dot: 'bg-indigo-500',
+  },
+  'range.delete': {
+    label: 'Range',
+    classes: 'border-rose-200 bg-rose-50 text-rose-700',
+    dot: 'bg-rose-500',
+  },
+  'range.bulk_delete': {
+    label: 'Bulk',
+    classes: 'border-rose-200 bg-rose-50 text-rose-700',
+    dot: 'bg-rose-500',
+  },
+}
+
+const DEFAULT_ACTIVITY_TAG = {
+  label: 'Activity',
+  classes: 'border-slate-200 bg-slate-50 text-slate-600',
+  dot: 'bg-slate-400',
+}
+
+const getActivityTag = (action: string) => ACTIVITY_TAGS[action] || DEFAULT_ACTIVITY_TAG
+
+const formatRelativeTime = (value: string) => {
+  const timestamp = new Date(value).getTime()
+  if (!Number.isFinite(timestamp)) return ''
+  const diffMs = Date.now() - timestamp
+  const diffSeconds = Math.max(0, Math.floor(diffMs / 1000))
+
+  if (diffSeconds < 5) return 'just now'
+  if (diffSeconds < 60) return `${diffSeconds} seconds ago`
+
+  const diffMinutes = Math.floor(diffSeconds / 60)
+  if (diffMinutes < 60) return `${diffMinutes} minutes ago`
+
+  const diffHours = Math.floor(diffMinutes / 60)
+  if (diffHours < 24) return `${diffHours} hours ago`
+
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays < 7) return `${diffDays} days ago`
+
+  const diffWeeks = Math.floor(diffDays / 7)
+  if (diffWeeks < 4) return `${diffWeeks} weeks ago`
+
+  const diffMonths = Math.floor(diffDays / 30)
+  if (diffMonths < 12) return `${diffMonths} months ago`
+
+  const diffYears = Math.floor(diffDays / 365)
+  return `${diffYears} years ago`
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [geofeeds, setGeofeeds] = useState<GeofeedFile[]>([])
@@ -78,9 +185,33 @@ export default function DashboardPage() {
   const [importCreatedId, setImportCreatedId] = useState<string | null>(null)
   const [importCommitted, setImportCommitted] = useState(false)
   const [importTargetIsDraft, setImportTargetIsDraft] = useState(false)
+  const [activity, setActivity] = useState<ActivityLogEntry[]>([])
+  const [activityLoading, setActivityLoading] = useState(false)
+  const [activityError, setActivityError] = useState<string | null>(null)
+
+  const fetchActivity = async () => {
+    try {
+      setActivityLoading(true)
+      setActivityError(null)
+      const res = await fetch('/geo/api/activity?limit=10')
+      const data = await res.json()
+
+      if (!data.success) {
+        setActivityError(data.error || 'Failed to fetch activity')
+        return
+      }
+
+      setActivity(data.data || [])
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setActivityLoading(false)
+    }
+  }
 
   useEffect(() => {
     fetchGeofeeds()
+    fetchActivity()
   }, [])
 
   useEffect(() => {
@@ -138,6 +269,7 @@ export default function DashboardPage() {
       setNewName('')
       setShowCreateForm(false)
       await fetchGeofeeds()
+      await fetchActivity()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -159,6 +291,7 @@ export default function DashboardPage() {
       }
 
       await fetchGeofeeds()
+      await fetchActivity()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     }
@@ -180,6 +313,7 @@ export default function DashboardPage() {
 
       setPublishNotice(`${formatGeofeedNotice(geofeed)} is now published.`)
       await fetchGeofeeds()
+      await fetchActivity()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -224,6 +358,7 @@ export default function DashboardPage() {
         setImportCreatedId(newId)
         setImportTargetIsDraft(true)
         await fetchRangesForImport(newId)
+        await fetchActivity()
       } else {
         if (!importGeofeedId) {
           setError('Select a geofeed to import into')
@@ -455,6 +590,7 @@ export default function DashboardPage() {
       setImportTargetIsDraft(false)
       setImportCommitted(true)
       await fetchGeofeeds()
+      await fetchActivity()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -483,6 +619,7 @@ export default function DashboardPage() {
     setShowImportPanel(false)
     setImportTargetIsDraft(false)
     await fetchGeofeeds()
+    await fetchActivity()
   }
 
   const handleContinueDraftImport = async (geofeedId: string) => {
@@ -504,6 +641,9 @@ export default function DashboardPage() {
 
   const handleDownloadGeofeed = (id: string) => {
     window.location.href = `/geo/api/geofeeds/${id}/download`
+    setTimeout(() => {
+      void fetchActivity()
+    }, 800)
   }
 
   const handleUnpublishGeofeed = async (geofeed: GeofeedFile) => {
@@ -524,6 +664,7 @@ export default function DashboardPage() {
 
       setPublishNotice(`${formatGeofeedNotice(geofeed)} is now unpublished.`)
       await fetchGeofeeds()
+      await fetchActivity()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -539,6 +680,8 @@ export default function DashboardPage() {
     await handleGenerateGeofeed(geofeed)
   }
 
+  const latestActivity = activity[0]
+
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-2 text-gray-600">
@@ -548,8 +691,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-700/70">
             Workspace
@@ -557,17 +701,30 @@ export default function DashboardPage() {
           <h1 className="mt-2 flex items-center gap-3 text-4xl font-semibold text-gray-900">
             <FilePlus className="h-8 w-8 text-emerald-700" /> Geofeeds
           </h1>
+          {latestActivity && (
+            <p className="mt-2 inline-flex flex-wrap items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/60 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <span className="uppercase tracking-[0.2em] text-emerald-700/70">
+                Last action
+              </span>
+              <span className="font-semibold text-gray-800">
+                {latestActivity.message}
+              </span>
+              <span className="text-[11px] font-semibold text-emerald-700/70">
+                {formatRelativeTime(latestActivity.createdAt)}
+              </span>
+            </p>
+          )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-3 flex flex-wrap items-center gap-2 self-start rounded-full border border-emerald-100 bg-white/80 p-1 shadow-sm sm:mt-0">
           <button
             onClick={() => setShowImportPanel(!showImportPanel)}
-            className="flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-5 py-2.5 text-sm font-semibold text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400"
+            className="flex items-center gap-2 rounded-full border border-emerald-100 bg-white/90 px-4 py-2 text-sm font-semibold text-emerald-900 transition hover:-translate-y-0.5 hover:border-emerald-300"
           >
             <UploadCloud className="h-4 w-4" /> Import
           </button>
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800"
+            className="flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800"
           >
             <PlusCircle className="h-5 w-5" /> Create New Geofeed
           </button>
@@ -1006,6 +1163,92 @@ export default function DashboardPage() {
           </table>
         </div>
       )}
+      </div>
+
+      <aside className="space-y-4 lg:sticky lg:top-24">
+        <div className="rounded-3xl border border-white/70 bg-white/85 shadow-[var(--shadow)]">
+          <div className="-mx-5 -mt-5 rounded-t-3xl border-b border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-white/80 px-5 pb-4 pt-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+                  Activity
+                </p>
+                <p className="text-sm text-gray-600">
+                  Recent actions
+                  {activity.length > 0 && (
+                    <span className="ml-2 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                      {activity.length}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard/activity"
+                  className="rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400"
+                >
+                  View all
+                </Link>
+                <button
+                  type="button"
+                  onClick={fetchActivity}
+                  disabled={activityLoading}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 disabled:opacity-60"
+                  title="Refresh activity"
+                >
+                  <RefreshCw className={activityLoading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-5 pb-5 pt-4">
+            {activityError && (
+              <p className="text-xs font-semibold text-red-600">{activityError}</p>
+            )}
+
+            {!activityError && activity.length === 0 && (
+              <p className="text-sm text-gray-500">
+                {activityLoading ? 'Loading activity...' : 'No activity yet.'}
+              </p>
+            )}
+
+            {activity.length > 0 && (
+              <ul className="max-h-[520px] space-y-3 overflow-auto pr-2">
+                {activity.map((entry, index) => {
+                  const tag = getActivityTag(entry.action)
+                  const isLast = index === activity.length - 1
+
+                  return (
+                    <li
+                      key={entry.id}
+                      className="relative rounded-2xl border border-transparent pl-7 pr-2 py-2 transition hover:border-emerald-100 hover:bg-emerald-50/40"
+                    >
+                      <span
+                        className={`absolute left-1.5 top-3 h-2.5 w-2.5 rounded-full ${tag.dot}`}
+                      />
+                      {!isLast && (
+                        <span className="absolute left-2.5 top-5 h-full w-px bg-emerald-100/70" />
+                      )}
+                      <div className="space-y-1">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tag.classes}`}
+                        >
+                          {tag.label}
+                        </span>
+                        <p className="text-sm font-semibold text-gray-900">{entry.message}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatRelativeTime(entry.createdAt)}
+                        </p>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
+      </aside>
     </div>
   )
 }

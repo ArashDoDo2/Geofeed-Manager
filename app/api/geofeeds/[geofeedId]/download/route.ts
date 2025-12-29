@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 
 export async function GET(
   _request: NextRequest,
@@ -43,6 +44,14 @@ export async function GET(
 
     const csvContent = csvLines.join('\n')
     const filename = `geofeed-${geofeedId}.csv`
+
+    await logActivity({
+      userId,
+      action: 'geofeed.download',
+      message: `Downloaded geofeed "${geofeed.name}" (${ranges.length} ranges)`,
+      geofeedId,
+      geofeedName: geofeed.name,
+    })
 
     return new NextResponse(csvContent, {
       status: 200,

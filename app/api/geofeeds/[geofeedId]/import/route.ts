@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex =
@@ -182,6 +183,15 @@ export async function POST(
         data: { isDraft: false },
       })
     }
+
+    const finalizeNote = finalize ? ' and finalized draft' : ''
+    await logActivity({
+      userId,
+      action: 'geofeed.import',
+      message: `Imported ${validRows.length} ranges into "${geofeed.name}"${finalizeNote}`,
+      geofeedId,
+      geofeedName: geofeed.name,
+    })
 
     return NextResponse.json({
       success: true,

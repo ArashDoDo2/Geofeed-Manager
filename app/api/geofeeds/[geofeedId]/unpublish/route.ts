@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -37,6 +38,14 @@ export async function POST(
         throw error
       }
     }
+
+    await logActivity({
+      userId,
+      action: 'geofeed.unpublish',
+      message: `Unpublished geofeed "${geofeed.name}"`,
+      geofeedId,
+      geofeedName: geofeed.name,
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

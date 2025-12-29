@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -50,6 +51,14 @@ export async function POST(
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
     const url = `${baseUrl}/geo/geofeed-${geofeedId}.csv`
+
+    await logActivity({
+      userId,
+      action: 'geofeed.publish',
+      message: `Published geofeed "${geofeed.name}" (${ranges.length} ranges)`,
+      geofeedId,
+      geofeedName: geofeed.name,
+    })
 
     return NextResponse.json({ success: true, url, recordCount: ranges.length })
   } catch (error) {

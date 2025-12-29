@@ -1,6 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+type CookieStore = Awaited<ReturnType<typeof cookies>>
+type CookieSetOptions = Extract<
+  Parameters<CookieStore['set']>,
+  [string, string, unknown]
+>[2]
+
 function getSupabaseCredentials() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -18,19 +24,19 @@ async function createCookieAwareServerClient() {
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      get(name) {
+      get(name: string) {
         return cookieStore.get(name)?.value
       },
-      set(name, value, options) {
+      set(name: string, value: string, options?: CookieSetOptions) {
         try {
-          cookieStore.set({ name, value, ...options })
+          cookieStore.set(name, value, options)
         } catch {
           // The cookies instance can be immutable in some contexts (e.g. middleware)
         }
       },
-      remove(name, options) {
+      remove(name: string, options?: CookieSetOptions) {
         try {
-          cookieStore.set({ name, value: '', ...options })
+          cookieStore.set(name, '', options)
         } catch {
           // The cookies instance can be immutable in some contexts (e.g. middleware)
         }

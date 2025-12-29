@@ -4,7 +4,7 @@ Use this prompt to regenerate the full codebase in a new workspace.
 
 ## Master Prompt
 
-Build a production-ready Geofeed Manager web app using Next.js 16.1.x App Router, TypeScript, Prisma, SQLite, Tailwind CSS, Lucide icons, and Supabase Auth (Google OAuth). Use @supabase/auth-helpers-nextjs only (never @supabase/ssr). App is deployed under basePath /geo with standalone output; use `next dev --webpack` for dev. All routes/assets must respect /geo.
+Build a production-ready Geofeed Manager web app using Next.js 16.1.x App Router, TypeScript, Prisma, SQLite, Tailwind CSS, Lucide icons, and Supabase Auth (Google OAuth). Use @supabase/auth-helpers-nextjs only (never @supabase/ssr). App is deployed under basePath /geo; use `next dev --webpack` for dev. All routes/assets must respect /geo.
 
 ### Core requirements
 - Multi-tenant isolation: never trust userId from client; always use session.user.id from Supabase server helpers.
@@ -15,7 +15,6 @@ Build a production-ready Geofeed Manager web app using Next.js 16.1.x App Router
 
 ### Next.js config
 ```
-output: 'standalone'
 basePath: '/geo'
 assetPrefix: '/geo'
 ```

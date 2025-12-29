@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { logActivity } from '@/lib/activity-log'
 
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$|^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\/\d{1,3}$/
@@ -106,6 +107,14 @@ export async function POST(
         city: city ? city.trim() : null,
         postalCode: postalCode ? postalCode.trim() : null,
       },
+    })
+
+    await logActivity({
+      userId,
+      action: 'range.create',
+      message: `Added range ${range.network} to "${geofeed.name}"`,
+      geofeedId,
+      geofeedName: geofeed.name,
     })
 
     return NextResponse.json({ success: true, data: range }, { status: 201 })

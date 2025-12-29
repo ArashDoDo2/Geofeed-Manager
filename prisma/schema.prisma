@@ -18,6 +18,7 @@ model GeofeedFile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ranges    IpRange[]
+  activityLogs ActivityLog[]
 }
 
 model IpRange {
@@ -33,4 +34,18 @@ model IpRange {
   updatedAt   DateTime @updatedAt
 
   geofeed     GeofeedFile @relation(fields: [geofeedId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id          String       @id @default(cuid())
+  userId      String
+  action      String
+  message     String
+  geofeedId   String?
+  geofeedName String?
+  createdAt   DateTime     @default(now())
+
+  geofeed     GeofeedFile? @relation(fields: [geofeedId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
 }
