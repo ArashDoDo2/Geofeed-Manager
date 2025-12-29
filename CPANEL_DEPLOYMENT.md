@@ -231,3 +231,4 @@ NEXT_PUBLIC_BASE_URL must be your domain.
 Supabase → Redirect → must be /geo/auth/callback.
 
 
+
