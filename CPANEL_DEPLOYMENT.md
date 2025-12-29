@@ -1,7 +1,5 @@
 # cPanel Deployment Guide (No SSH, Production)
 
-# cPanel Deployment Guide (No SSH, Production)
-
 This guide uses **File Manager + Setup Node.js App** only (no SSH).
 
 ## Requirements
@@ -16,11 +14,14 @@ npm install
 npm run build
 ```
 
+This produces `.next/standalone/server.js` and copies it to `server.js` at the app root.
+
 ## 2) Upload to Server (File Manager)
 
 Upload the **built output**, not source files. Your app root should contain:
 
-- `.next/` (must include `.next/BUILD_ID`, `.next/server/`, `.next/static/`)
+- `.next/` (must include `.next/BUILD_ID`, `.next/server/`, `.next/static/`, `.next/standalone/`)
+- `server.js` (standalone entrypoint copied from `.next/standalone/server.js`)
 - `public/`
 - `prisma/`
 - `data/geo.db`
@@ -33,9 +34,9 @@ Tip: Use **split packages** to avoid cPanel extraction issues:
 
 1) **core.zip** (small):
    - `public/`, `prisma/`, `data/geo.db`, `package.json`, `package-lock.json`,
-     `next.config.ts`, `.env`
+     `next.config.ts`, `.env`, `server.js`
 2) **next.zip** (only `.next/`):
-   - `.next/BUILD_ID`, `.next/server/`, `.next/static/`, manifest files
+   - `.next/BUILD_ID`, `.next/server/`, `.next/static/`, `.next/standalone/`, manifest files
 
 Upload/extract **core.zip first**, then **next.zip** into the same app root.
 
@@ -70,17 +71,11 @@ In **Setup Node.js App**:
 
 - **Application root**: your app folder
 - **Application URL**: your domain plus `/geo`
-- **Startup file**: `node_modules/next/dist/bin/next`
+- **Startup file**: `server.js`
 - **Node.js version**: 22 LTS or newer
 - **Application mode**: Production (`NODE_ENV=production`)
 
 Save and start the application.
-
-Set **Application startup file arguments** to:
-
-```
-start
-```
 
 ## 6) Install Dependencies (cPanel)
 
