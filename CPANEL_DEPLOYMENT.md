@@ -94,6 +94,7 @@ cPanel sometimes preserves zip permissions. If you see missing files or 403 erro
 
 ```bash
 # Fix perms (run from app root)
+chmod -R u+rwX,go+rX .
 find .next -type d -exec chmod 755 {} +
 find .next -type f -exec chmod 644 {} +
 chmod 775 data
