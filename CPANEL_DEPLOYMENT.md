@@ -1,5 +1,7 @@
 # cPanel Deployment Guide (No SSH, Production)
 
+# cPanel Deployment Guide (No SSH, Production)
+
 This guide uses **File Manager + Setup Node.js App** only (no SSH).
 
 ## Requirements
@@ -19,7 +21,6 @@ npm run build
 Upload the **built output**, not source files. Your app root should contain:
 
 - `.next/` (must include `.next/BUILD_ID`, `.next/server/`, `.next/static/`)
-- `server.js` (root wrapper entrypoint)
 - `public/`
 - `prisma/`
 - `data/geo.db`
@@ -32,7 +33,7 @@ Tip: Use **split packages** to avoid cPanel extraction issues:
 
 1) **core.zip** (small):
    - `public/`, `prisma/`, `data/geo.db`, `package.json`, `package-lock.json`,
-     `next.config.ts`, `.env`, `server.js`
+     `next.config.ts`, `.env`
 2) **next.zip** (only `.next/`):
    - `.next/BUILD_ID`, `.next/server/`, `.next/static/`, manifest files
 
@@ -69,11 +70,17 @@ In **Setup Node.js App**:
 
 - **Application root**: your app folder
 - **Application URL**: your domain plus `/geo`
-- **Startup file**: `server.js`
+- **Startup file**: `node_modules/next/dist/bin/next`
 - **Node.js version**: 22 LTS or newer
 - **Application mode**: Production (`NODE_ENV=production`)
 
 Save and start the application.
+
+Set **Application startup file arguments** to:
+
+```
+start
+```
 
 ## 6) Install Dependencies (cPanel)
 
@@ -100,20 +107,20 @@ find ".next/server/app/(auth)" -type d -exec chmod 755 {} +
 find ".next/server/app/(auth)" -type f -exec chmod 644 {} +
 ```
 
-## 7) Supabase Redirects
+## 8) Supabase Redirects
 
 In Supabase:
 
 - **Site URL**: `https://your-domain.com/geo`
 - **Redirect URLs**: `https://your-domain.com/geo/auth/callback`
 
-## 8) Verify
+## 9) Verify
 
 Visit: `https://your-domain.com/geo`
 
 ## Troubleshooting
 
-- `production-start-no-build-id`: `.next/BUILD_ID` is missing → re-upload `.next/`.
+- `production-start-no-build-id`: `.next/BUILD_ID` is missing; re-upload `.next/`.
 - `Cannot find module 'next'`: run NPM Install or upload package with `node_modules`.
 - `@prisma/client-<hash> not found`: run `prisma generate` or upload `node_modules/.prisma`.
 - Redirects to localhost: fix `NEXT_PUBLIC_BASE_URL` and Supabase Redirect URLs.
