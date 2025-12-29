@@ -176,6 +176,20 @@ You should see the login page.
 
 Try logging in with Google.
 
+?? 10) Local vs cPanel Builds (Important)
+
+Prisma bundles OS-specific query engines inside the standalone build.
+
+For local testing on Windows:
+- Build on Windows.
+- Run 
+pm run start.
+
+For cPanel (Linux):
+- Build on WSL/Linux.
+- Upload the Linux standalone build.
+
+
 🟥 TROUBLESHOOTING (All Cases Fixed)
 ❌ Error: “query engine binary not found”
 
@@ -215,3 +229,5 @@ Fix:
 NEXT_PUBLIC_BASE_URL must be your domain.
 
 Supabase → Redirect → must be /geo/auth/callback.
+
+
