@@ -1,17 +1,17 @@
-﻿âœ… WORKING cPanel Deployment Guide for Next.js + Prisma + SQLite (Standalone Build)
+✅ WORKING cPanel Deployment Guide for Next.js + Prisma + SQLite (Standalone Build)
 
-(Updated and fixed â€” safe for production on cPanel)
+(Updated and fixed — safe for production on cPanel)
 
 This guide assumes NO SSH and uses cPanel File Manager + Setup Node.js App only.
 
-ðŸŸ¦ 1) Prepare Your Build ON WSL (NOT Windows native)
+🟦 1) Prepare Your Build ON WSL (NOT Windows native)
 
 Prisma needs Linux binaries. WSL gives you exactly that.
 
-1ï¸âƒ£ Install dependencies (WSL)
+1️⃣ Install dependencies (WSL)
 npm install
 
-2ï¸âƒ£ Confirm Prisma binary target inside prisma/schema.prisma
+2️⃣ Confirm Prisma binary target inside prisma/schema.prisma
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
@@ -20,16 +20,16 @@ generator client {
 
 (If your server uses GNU libc I will tell you, but 99% of shared hosts are musl.)
 
-3ï¸âƒ£ Generate Prisma client (WSL)
+3️⃣ Generate Prisma client (WSL)
 npx prisma generate
 
 
 This will produce:
 
-query_engine-linux-musl.node   âœ” (correct)
-query_engine-windows.dll.node  âŒ (safe to delete later)
+query_engine-linux-musl.node   ✔ (correct)
+query_engine-windows.dll.node  ❌ (safe to delete later)
 
-4ï¸âƒ£ Build standalone Next.js app (WSL)
+4️⃣ Build standalone Next.js app (WSL)
 npm run build
 
 
@@ -41,7 +41,7 @@ You will now have:
 .next/BUILD_ID
 server.js   <-- wrapper
 
-ðŸŸ¦ 2) Create DEPLOY Folder (WSL)
+🟦 2) Create DEPLOY Folder (WSL)
 
 This avoids uploading unnecessary files.
 
@@ -75,7 +75,7 @@ cd ..
 
 Your ZIP is ready.
 
-ðŸŸ¦ 3) Upload to cPanel (File Manager)
+🟦 3) Upload to cPanel (File Manager)
 
 Upload and extract deploy.zip into:
 
@@ -99,11 +99,11 @@ app/
     package.json
     server.js
 
-ðŸŸ¦ 4) Setup cPanel Node.js App
+🟦 4) Setup cPanel Node.js App
 
 Open:
 
-âž¡ Setup Node.js App
+➡ Setup Node.js App
 
 Set:
 
@@ -116,7 +116,7 @@ Application mode	production
 
 Click Save then Start App.
 
-ðŸŸ¦ 5) Environment Variables in cPanel
+🟦 5) Environment Variables in cPanel
 
 Add:
 
@@ -132,21 +132,26 @@ Standalone note:
 - If you prefer, set DATABASE_URL="file:../../data/geo.db" directly.
 
 
-Click Save â†’ Restart App.
+Click Save → Restart App.
 
-ðŸŸ¦ 6) DO NOT RUN NPM INSTALL on cPanel
+🟦 6) DO NOT RUN NPM INSTALL on cPanel
 
 You are running a standalone build.
 
-Your app does NOT need cPanelâ€™s node_modules.
+Your app does NOT need cPanel’s node_modules.
 
 Running "NPM Install" can BREAK Prisma engines.
 
 You already have the correct Linux Prisma binaries inside .next/standalone/node_modules.
 
-âŒ Do NOT click â€œRun NPM Installâ€.
-âœ” Your app already contains everything needed.
-ðŸŸ¦ 7) SQLite DB Upload
+❌ Do NOT click “Run NPM Install”.
+✔ Your app already contains everything needed.
+dYY? 6a) DO NOT SHIP .env FILES
+
+Standalone runs from .next/standalone, and any .env/.env.local there will override cPanel env vars.
+
+Make sure there are no .env* files in the deploy.zip or on the server.
+🟦 7) SQLite DB Upload
 
 Place your SQLite file in:
 
@@ -158,14 +163,14 @@ Correct permissions in File Manager:
 Path	Perm
 data/	755
 data/geo.db	644
-ðŸŸ¦ 8) Supabase Configuration
+🟦 8) Supabase Configuration
 
-Inside Supabase â†’ Authentication â†’ URL config:
+Inside Supabase → Authentication → URL config:
 
 Setting	Value
 Site URL	https://yourdomain.com/geo
 Redirect URL	https://yourdomain.com/geo/auth/callback
-ðŸŸ¦ 9) Verify Deployment
+🟦 9) Verify Deployment
 
 Visit:
 
@@ -176,7 +181,7 @@ You should see the login page.
 
 Try logging in with Google.
 
-dYYÝ 10) Local vs cPanel Builds (Important)
+dYY� 10) Local vs cPanel Builds (Important)
 
 Prisma bundles OS-specific query engines inside the standalone build.
 
@@ -188,7 +193,7 @@ For cPanel (Linux):
 - Build on WSL/Linux.
 - Upload the Linux standalone build.
 
-ðŸŸ¥ TROUBLESHOOTING (All Cases Fixed)
+🟥 TROUBLESHOOTING (All Cases Fixed)
 
 Quick Checklist (DB not opening)
 - Use an absolute DB path in cPanel: DATABASE_URL="file:/home/USERNAME/app/Geofeed-Manager/data/geo.db"
@@ -197,7 +202,7 @@ Quick Checklist (DB not opening)
 - Restart the Node.js app after updating env vars
 - Build on WSL/Linux and remove any Windows engines from deploy/
 
-âŒ Error: â€œquery engine binary not foundâ€
+❌ Error: “query engine binary not found”
 
 Cause: wrong Prisma platform.
 
@@ -209,7 +214,7 @@ npm run build
 
 Make sure linux-musl is included.
 
-âŒ Error: â€œSymlink node_modules is invalidâ€
+❌ Error: “Symlink node_modules is invalid”
 
 Cause: cPanel tried to run next start or dev server.
 
@@ -222,19 +227,22 @@ Not:
 
 node_modules/next/dist/bin/next
 
-âŒ Error: â€œproduction-start-no-build-idâ€
+❌ Error: “production-start-no-build-id”
 
 Cause: missing .next/BUILD_ID.
 
 Fix: upload full .next folder from deploy folder.
 
-âŒ Auth redirects to localhost
+❌ Auth redirects to localhost
 
 Fix:
 
 NEXT_PUBLIC_BASE_URL must be your domain.
 
-Supabase â†’ Redirect â†’ must be /geo/auth/callback.
+Supabase → Redirect → must be /geo/auth/callback.
+
+
+
 
 
 

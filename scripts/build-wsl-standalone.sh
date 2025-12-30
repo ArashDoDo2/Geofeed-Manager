@@ -55,6 +55,9 @@ echo "Removing Windows Prisma artifacts..."
 find deploy -type f -name "*windows*.node" -delete
 find deploy -type f -name "*.dll.node" -delete
 
+echo "Removing env files from deploy..."
+find deploy -maxdepth 2 -type f -name ".env*" -delete
+
 echo "Creating ZIP..."
 cd deploy
 zip -r ../deploy.zip .
