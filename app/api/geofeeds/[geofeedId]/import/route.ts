@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { getRouteHandlerUser } from '@/lib/supabase-server'
 import { logActivity } from '@/lib/activity-log'
 
 function isValidCIDR(cidr: string): boolean {
@@ -18,12 +18,12 @@ export async function POST(
   { params }: { params: Promise<{ geofeedId: string }> }
 ) {
   try {
-    const session = await getRouteHandlerSession()
-    if (!session) {
+    const user = await getRouteHandlerUser()
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
     const { geofeedId } = await params
     if (!geofeedId) {
       return NextResponse.json({ success: false, error: 'Invalid geofeed id' }, { status: 400 })

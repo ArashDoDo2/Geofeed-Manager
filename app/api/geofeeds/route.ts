@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { getRouteHandlerUser } from '@/lib/supabase-server'
 import { logActivity } from '@/lib/activity-log'
 import fs from 'fs/promises'
 import path from 'path'
 
 export async function GET() {
   try {
-    const session = await getRouteHandlerSession()
-    if (!session) {
+    const user = await getRouteHandlerUser()
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
     const geofeeds = await prisma.geofeedFile.findMany({
       where: { userId },
       include: {
@@ -52,8 +52,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getRouteHandlerSession()
-    if (!session) {
+    const user = await getRouteHandlerUser()
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -74,14 +74,14 @@ export async function POST(request: NextRequest) {
 
     const geofeed = await prisma.geofeedFile.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         name: name.trim(),
         isDraft: Boolean(isDraft),
       },
     })
 
     await logActivity({
-      userId: session.user.id,
+      userId: user.id,
       action: 'geofeed.create',
       message: `Created geofeed "${geofeed.name}"`,
       geofeedId: geofeed.id,
@@ -97,3 +97,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+

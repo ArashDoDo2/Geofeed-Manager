@@ -1,11 +1,11 @@
-import { getSession } from '@/lib/supabase-server'
+import { getUser } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 export default async function HomePage() {
-  const session = await getSession()
+  const user = await getUser()
 
-  if (session) {
+  if (user) {
     redirect('/dashboard')
   }
 

@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/supabase-server'
+import { getUser } from '@/lib/supabase-server'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LogoutButton } from './logout-button'
@@ -14,8 +14,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getSession()
-  const user = session?.user
+  const user = await getUser()
 
   return (
     <html lang="en">
@@ -25,7 +24,7 @@ export default async function RootLayout({
             <div className="flex items-center gap-8">
               <Link
                 href="/"
-                className="text-xl font-semibold text-gray-900 no-underline"
+                className="text-2xl font-semibold text-gray-900 no-underline md:text-3xl"
               >
                 Geofeed Manager
               </Link>

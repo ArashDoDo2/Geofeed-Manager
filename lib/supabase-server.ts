@@ -53,7 +53,7 @@ export async function createSupabaseServerComponentClient() {
   }
 }
 
-export async function getSession() {
+export async function getUser() {
   const { supabase, cookieStore } = await createCookieAwareServerClient()
   const hasAuthCookie = cookieStore
     .getAll()
@@ -64,15 +64,15 @@ export async function getSession() {
   }
 
   try {
-    const { data, error } = await supabase.auth.getSession()
+    const { data, error } = await supabase.auth.getUser()
     if (error) {
-      console.error('Error getting session:', error)
+      console.error('Error getting user:', error)
       return null
     }
 
-    return data.session
+    return data.user
   } catch (error) {
-    console.error('Unexpected error in getSession:', error)
+    console.error('Unexpected error in getUser:', error)
     return null
   }
 }
@@ -83,7 +83,7 @@ export async function createSupabaseRouteHandlerClient() {
   }
 }
 
-export async function getRouteHandlerSession() {
+export async function getRouteHandlerUser() {
   const { supabase, cookieStore } = await createCookieAwareServerClient()
   const hasAuthCookie = cookieStore
     .getAll()
@@ -94,15 +94,15 @@ export async function getRouteHandlerSession() {
   }
 
   try {
-    const { data, error } = await supabase.auth.getSession()
+    const { data, error } = await supabase.auth.getUser()
     if (error) {
-      console.error('Error getting session:', error)
+      console.error('Error getting user:', error)
       return null
     }
 
-    return data.session
+    return data.user
   } catch (error) {
-    console.error('Unexpected error in getRouteHandlerSession:', error)
+    console.error('Unexpected error in getRouteHandlerUser:', error)
     return null
   }
 }

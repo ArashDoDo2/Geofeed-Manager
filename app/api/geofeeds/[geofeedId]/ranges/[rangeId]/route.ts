@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { getRouteHandlerUser } from '@/lib/supabase-server'
 import { logActivity } from '@/lib/activity-log'
 
 function isValidCIDR(cidr: string): boolean {
@@ -23,12 +23,12 @@ export async function PATCH(
   { params }: { params: Promise<{ geofeedId: string; rangeId: string }> }
 ) {
   try {
-    const session = await getRouteHandlerSession()
-    if (!session) {
+    const user = await getRouteHandlerUser()
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
     const { geofeedId, rangeId } = await params
 
     const range = await verifyOwnership(userId, geofeedId, rangeId)
@@ -106,12 +106,12 @@ export async function DELETE(
   { params }: { params: Promise<{ geofeedId: string; rangeId: string }> }
 ) {
   try {
-    const session = await getRouteHandlerSession()
-    if (!session) {
+    const user = await getRouteHandlerUser()
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
     const { geofeedId, rangeId } = await params
 
     const range = await verifyOwnership(userId, geofeedId, rangeId)

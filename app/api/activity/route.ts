@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getRouteHandlerSession } from '@/lib/supabase-server'
+import { getRouteHandlerUser } from '@/lib/supabase-server'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getRouteHandlerSession()
-    if (!session) {
+    const user = await getRouteHandlerUser()
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
     const { searchParams } = new URL(request.url)
     const limitParam = searchParams.get('limit')
     const rawLimit = limitParam ? Number(limitParam) : null
@@ -32,3 +32,4 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
