@@ -32,8 +32,9 @@ echo "Building Next.js standalone..."
 npm run build
 
 echo "Verifying Prisma Linux engine..."
-if ! ls .next/standalone/node_modules/.prisma/client/query_engine-linux*.node >/dev/null 2>&1; then
-  echo "Missing Linux Prisma engine. Build must run on WSL/Linux." >&2
+engine_dir=".next/standalone/node_modules/.prisma/client"
+if ! ls "${engine_dir}"/libquery_engine-rhel-openssl-*.so.node >/dev/null 2>&1; then
+  echo "Missing RHEL Prisma engine. Build must run on WSL/Linux with RHEL targets." >&2
   exit 1
 fi
 
