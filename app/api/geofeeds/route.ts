@@ -21,7 +21,10 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     })
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+    if (!baseUrl) {
+      throw new Error('NEXT_PUBLIC_BASE_URL is not set')
+    }
     const enriched = await Promise.all(
       geofeeds.map(async (geofeed) => {
         const filePath = path.join(process.cwd(), 'public', `geofeed-${geofeed.id}.csv`)
