@@ -20,10 +20,9 @@ if [ ! -f "${schema_file}" ]; then
 fi
 
 if ! grep -q 'binaryTargets' "${schema_file}" || \
-   ! grep -q 'linux-x64' "${schema_file}" || \
    ! grep -q 'rhel-openssl-3.0.x' "${schema_file}" || \
    ! grep -q 'rhel-openssl-1.1.x' "${schema_file}"; then
-  echo "schema.prisma must include binaryTargets = [\"native\", \"linux-x64\", \"rhel-openssl-3.0.x\", \"rhel-openssl-1.1.x\"]." >&2
+  echo "schema.prisma must include binaryTargets = [\"native\", \"rhel-openssl-3.0.x\", \"rhel-openssl-1.1.x\"]." >&2
   exit 1
 fi
 
