@@ -17,12 +17,20 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 17px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px;
+  }
 }
 
 body {
   font-family: 'Space Grotesk', 'Syne', sans-serif;
   background: var(--bg);
   color: var(--ink);
+  line-height: 1.6;
 }
 
 body::before {
@@ -68,6 +76,18 @@ h4 {
   letter-spacing: -0.02em;
 }
 
+h1 {
+  font-size: clamp(2.4rem, 3vw + 1rem, 3.6rem);
+}
+
+h2 {
+  font-size: clamp(1.9rem, 2vw + 0.8rem, 2.6rem);
+}
+
+h3 {
+  font-size: clamp(1.4rem, 1.4vw + 0.7rem, 2rem);
+}
+
 a {
   @apply text-emerald-700 hover:text-emerald-900;
 }
@@ -79,7 +99,7 @@ button {
 input,
 select,
 textarea {
-  @apply rounded-xl border border-[color:var(--border)] bg-white/70 px-4 py-2 text-gray-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200;
+  @apply rounded-xl border border-[color:var(--border)] bg-white/70 px-4 py-2.5 text-base text-gray-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200;
 }
 
 table {

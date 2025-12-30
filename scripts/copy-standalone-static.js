@@ -4,8 +4,8 @@ const path = require('path')
 const appRoot = process.cwd()
 const staticSource = path.join(appRoot, '.next', 'static')
 const staticDest = path.join(appRoot, '.next', 'standalone', '.next', 'static')
-const serverSource = path.join(appRoot, '.next', 'standalone', 'server.js')
-const serverDest = path.join(appRoot, 'server.js')
+const prismaSource = path.join(appRoot, 'node_modules', '.prisma')
+const prismaDest = path.join(appRoot, '.next', 'standalone', 'node_modules', '.prisma')
 
 const copyDir = (src, dest) => {
   if (!fs.existsSync(src)) return
@@ -22,7 +22,4 @@ const copyDir = (src, dest) => {
 }
 
 copyDir(staticSource, staticDest)
-
-if (fs.existsSync(serverSource)) {
-  fs.copyFileSync(serverSource, serverDest)
-}
+copyDir(prismaSource, prismaDest)

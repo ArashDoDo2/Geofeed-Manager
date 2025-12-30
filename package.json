@@ -6,7 +6,7 @@
     "dev": "next dev --webpack",
     "build": "prisma generate && next build",
     "postbuild": "node scripts/copy-standalone-static.js",
-    "start": "node server.js",
+    "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"

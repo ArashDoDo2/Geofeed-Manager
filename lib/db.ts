@@ -6,12 +6,21 @@ const globalForPrisma = global as unknown as { prisma?: PrismaClient }
 
 const isProduction = process.env.NODE_ENV === 'production'
 const dbUrl = process.env.DATABASE_URL
+const absoluteDbFilePath = path.resolve(
+  process.cwd(),
+  isProduction ? '../../data/geo.db' : 'data/geo.db'
+)
+const absoluteDbFileUrl = `file:${absoluteDbFilePath.split(path.sep).join('/')}`
 
 if (isProduction) {
   if (!dbUrl) {
-    process.env.DATABASE_URL = 'file:../../data/geo.db'
-  } else if (dbUrl.startsWith('file:./data/')) {
-    process.env.DATABASE_URL = dbUrl.replace('file:./data/', 'file:../../data/')
+    process.env.DATABASE_URL = absoluteDbFileUrl
+  } else if (
+    dbUrl.startsWith('file:./data/') ||
+    dbUrl.startsWith('file:../') ||
+    dbUrl.startsWith('file:../../')
+  ) {
+    process.env.DATABASE_URL = absoluteDbFileUrl
   }
 }
 

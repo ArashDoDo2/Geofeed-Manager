@@ -7,6 +7,9 @@ import { useState } from 'react'
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const showDebug =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('debug')
 
   const handleGoogleSignIn = async () => {
     try {
@@ -76,11 +79,36 @@ export default function LoginPage() {
           >
             Help & Guides
           </a>
-        </div>
-        <p className="mt-4 text-xs text-gray-500">
-          By continuing you agree to publish only data you own.
-        </p>
       </div>
+      {showDebug && (
+        <div className="mt-6 w-full max-w-lg rounded-2xl border border-amber-200 bg-amber-50/80 p-5 text-xs text-amber-900 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-700">
+            Debug
+          </p>
+          <div className="mt-3 space-y-2">
+            <div>
+              <span className="font-semibold">NEXT_PUBLIC_BASE_URL: </span>
+              {process.env.NEXT_PUBLIC_BASE_URL || '(unset)'}
+            </div>
+            <div>
+              <span className="font-semibold">NEXT_PUBLIC_SUPABASE_URL: </span>
+              {process.env.NEXT_PUBLIC_SUPABASE_URL || '(unset)'}
+            </div>
+            <div>
+              <span className="font-semibold">Origin: </span>
+              {window.location.origin}
+            </div>
+            <div>
+              <span className="font-semibold">redirectTo: </span>
+              {`${window.location.origin}/geo/auth/callback`}
+            </div>
+          </div>
+        </div>
+      )}
+      <p className="mt-4 text-xs text-gray-500">
+        By continuing you agree to publish only data you own.
+      </p>
+    </div>
     </div>
   )
 }
