@@ -5,7 +5,7 @@ type NextResponseType = ReturnType<typeof NextResponse.next>
 type CookieSetOptions = Parameters<NextResponseType['cookies']['set']>[2]
 type CookieToSet = { name: string; value: string; options?: CookieSetOptions }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: request.headers } })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
