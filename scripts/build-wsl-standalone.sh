@@ -29,7 +29,15 @@ fi
 npx prisma generate
 
 echo "Building Next.js standalone..."
+created_env_file=""
+if [ ! -f ".env" ]; then
+  : > .env
+  created_env_file="true"
+fi
 npm run build
+if [ -n "${created_env_file}" ]; then
+  rm -f .env
+fi
 
 echo "Verifying Prisma Linux engine..."
 engine_dir=".next/standalone/node_modules/.prisma/client"
