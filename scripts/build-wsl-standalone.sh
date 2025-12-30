@@ -13,8 +13,20 @@ echo "Installing Linux node_modules..."
 npm ci
 
 echo "Generating Prisma Linux binaries..."
-# Ensure prisma/schema.prisma has:
-# binaryTargets = ["native", "linux-musl", "linux-x64"]
+schema_file="prisma/schema.prisma"
+if [ ! -f "${schema_file}" ]; then
+  echo "Missing ${schema_file}." >&2
+  exit 1
+fi
+
+if ! grep -q 'binaryTargets' "${schema_file}" || \
+   ! grep -q 'linux-x64' "${schema_file}" || \
+   ! grep -q 'rhel-openssl-3.0.x' "${schema_file}" || \
+   ! grep -q 'rhel-openssl-1.1.x' "${schema_file}"; then
+  echo "schema.prisma must include binaryTargets = [\"native\", \"linux-x64\", \"rhel-openssl-3.0.x\", \"rhel-openssl-1.1.x\"]." >&2
+  exit 1
+fi
+
 npx prisma generate
 
 echo "Building Next.js standalone..."
