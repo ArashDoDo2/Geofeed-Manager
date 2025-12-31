@@ -73,6 +73,7 @@ app/
   (auth)/login/page.tsx
   (auth)/auth/callback/route.ts
   dashboard/page.tsx
+  dashboard/_components/
   dashboard/[geofeedId]/page.tsx
   help/page.tsx
   api/geofeeds/route.ts
