@@ -16,6 +16,7 @@ model GeofeedFile {
   userId    String
   name      String
   isDraft   Boolean  @default(false)
+  published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ranges    IpRange[]

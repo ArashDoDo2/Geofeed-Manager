@@ -39,6 +39,11 @@ export async function POST(
       }
     }
 
+    await prisma.geofeedFile.updateMany({
+      where: { id: geofeedId, userId },
+      data: { published: false },
+    })
+
     await logActivity({
       userId,
       action: 'geofeed.unpublish',

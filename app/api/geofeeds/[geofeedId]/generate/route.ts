@@ -49,6 +49,11 @@ export async function POST(
     const filePath = path.join(publicDir, `geofeed-${geofeedId}.csv`)
     await fs.writeFile(filePath, csvContent, 'utf-8')
 
+    await prisma.geofeedFile.updateMany({
+      where: { id: geofeedId, userId },
+      data: { published: true },
+    })
+
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_BASE_URL is not set')

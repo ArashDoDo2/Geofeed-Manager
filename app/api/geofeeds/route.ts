@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerUser } from '@/lib/supabase-server'
 import { logActivity } from '@/lib/activity-log'
-import fs from 'fs/promises'
-import path from 'path'
 
 export async function GET() {
   try {
@@ -25,20 +23,12 @@ export async function GET() {
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_BASE_URL is not set')
     }
-    const enriched = await Promise.all(
-      geofeeds.map(async (geofeed) => {
-        const filePath = path.join(process.cwd(), 'public', `geofeed-${geofeed.id}.csv`)
-        let publishedUrl: string | null = null
-        try {
-          await fs.access(filePath)
-          publishedUrl = `${baseUrl}/geo/geofeed-${geofeed.id}.csv`
-        } catch {
-          publishedUrl = null
-        }
-
-        return { ...geofeed, publishedUrl }
-      })
-    )
+    const enriched = geofeeds.map((geofeed) => ({
+      ...geofeed,
+      publishedUrl: geofeed.published
+        ? `${baseUrl}/geo/geofeed-${geofeed.id}.csv`
+        : null,
+    }))
 
     return NextResponse.json({ success: true, data: enriched })
   } catch (error) {

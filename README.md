@@ -24,7 +24,7 @@ Multi-tenant web app for managing RFC 8805 geofeed CSVs with Supabase Auth, Pris
 
 ```bash
 npm install
-cp .env.example .env.local
+# Create .env.local with the values below
 npm run prisma:migrate
 npm run dev
 ```
@@ -89,7 +89,7 @@ lib/
   supabase-client.ts
   supabase-server.ts
 prisma/schema.prisma
-middleware.ts
+proxy.ts
 next.config.ts
 ```
 
