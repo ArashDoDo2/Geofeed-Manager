@@ -14,9 +14,20 @@ const sections = [
     id: 'add-ip-ranges',
     body: [
       'Use CIDR format, e.g. 192.0.2.0/24.',
-      'Country code must be 2-letter ISO, e.g. US.',
-      'Subdivision, city, and postal are optional fields.',
+      'Alpha2code is the RFC country field: 2-letter ISO (case-insensitive).',
+      'Region maps to RFC subdivision; city and postal are optional fields.',
       'Use bulk delete to remove multiple ranges at once.',
+    ],
+  },
+  {
+    title: 'RFC 8805 Fields',
+    id: 'rfc-fields',
+    body: [
+      'Network: CIDR range (IPv4 or IPv6).',
+      'Alpha2code: 2-letter ISO country code (case-insensitive).',
+      'Region: subdivision or state/province (optional).',
+      'City: free-form locality (optional).',
+      'Postal: postal/ZIP code (optional).',
     ],
   },
   {

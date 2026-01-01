@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerUser } from '@/lib/supabase-server'
 import { logActivity } from '@/lib/activity-log'
+import { isValidAlpha2Code, normalizeAlpha2Code } from '@/lib/alpha2-codes'
 
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$|^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\/\d{1,3}$/
   return cidrRegex.test(cidr.trim())
 }
 
-function isValidCountryCode(code: string): boolean {
-  return /^[A-Z]{2}$/.test(code.trim())
-}
 
 async function verifyOwnership(userId: string, geofeedId: string, rangeId: string) {
   return prisma.ipRange.findFirst({
@@ -57,9 +55,12 @@ export async function PATCH(
       )
     }
 
-    if (!isValidCountryCode(countryCode)) {
+    if (!isValidAlpha2Code(countryCode)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid country code (must be 2-letter ISO code)' },
+        {
+          success: false,
+          error: 'Invalid alpha2code (must be a 2-letter ISO 3166-1 code)',
+        },
         { status: 400 }
       )
     }
@@ -68,7 +69,7 @@ export async function PATCH(
       where: { id: rangeId, geofeedId, userId },
       data: {
         network: network.trim(),
-        countryCode: countryCode.trim().toUpperCase(),
+      countryCode: normalizeAlpha2Code(countryCode),
         subdivision: subdivision ? subdivision.trim() : null,
         city: city ? city.trim() : null,
         postalCode: postalCode ? postalCode.trim() : null,

@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Download, FileSpreadsheet, Pencil, Plus, Trash2 } from 'lucide-react'
+import { isValidAlpha2Code, normalizeAlpha2Code } from '@/lib/alpha2-codes'
 
 interface IpRange {
   id: string
@@ -101,6 +102,13 @@ export default function GeofeedDetailPage() {
       setError('Network and country code are required')
       return
     }
+    const normalizedCountryCode = normalizeAlpha2Code(formData.countryCode)
+    if (!isValidAlpha2Code(normalizedCountryCode)) {
+      setError(
+        'Alpha2code must be a valid 2-letter ISO 3166-1 code (case-insensitive)'
+      )
+      return
+    }
 
     try {
       if (!geofeedId) {
@@ -116,7 +124,7 @@ export default function GeofeedDetailPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, countryCode: normalizedCountryCode }),
       })
       const data = await res.json()
 
@@ -258,8 +266,6 @@ export default function GeofeedDetailPage() {
     return cidrRegex.test(cidr.trim())
   }
 
-  const isValidCountryCode = (code: string) => /^[A-Z]{2}$/.test(code.trim())
-
   const normalizeKey = (row: {
     network?: string
     countryCode?: string
@@ -269,7 +275,7 @@ export default function GeofeedDetailPage() {
   }) =>
     [
       (row.network || '').trim(),
-      (row.countryCode || '').trim().toUpperCase(),
+      normalizeAlpha2Code(row.countryCode || ''),
       (row.subdivision || '').trim(),
       (row.city || '').trim(),
       (row.postalCode || '').trim(),
@@ -315,13 +321,13 @@ export default function GeofeedDetailPage() {
       }
 
       const [network, countryCode, subdivision, city, postalCode] = parts.map((p) => p.trim())
-      const normalizedCountry = countryCode.toUpperCase()
+      const normalizedCountry = normalizeAlpha2Code(countryCode)
 
       let reason = ''
       if (!network || !isValidCIDR(network)) {
         reason = 'Invalid CIDR network'
-      } else if (!normalizedCountry || !isValidCountryCode(normalizedCountry)) {
-        reason = 'Invalid country code'
+      } else if (!normalizedCountry || !isValidAlpha2Code(normalizedCountry)) {
+        reason = 'Invalid alpha2code'
       }
 
       const key = normalizeKey({
@@ -720,11 +726,13 @@ export default function GeofeedDetailPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Country Code*
+                Alpha2code (Country)*
               </label>
               <input
                 type="text"
                 maxLength={2}
+                pattern="[A-Za-z]{2}"
+                title="Enter a 2-letter ISO 3166-1 alpha-2 code (case-insensitive)"
                 value={formData.countryCode}
                 onChange={(e) =>
                   setFormData({ ...formData, countryCode: e.target.value.toUpperCase() })
@@ -732,10 +740,13 @@ export default function GeofeedDetailPage() {
                 placeholder="e.g., US"
                 className="mt-1"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                RFC 8805 alpha2code: 2-letter ISO (case-insensitive), reserved codes ok.
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Subdivision
+                Region
               </label>
               <input
                 type="text"
@@ -804,7 +815,7 @@ export default function GeofeedDetailPage() {
                 </th>
                 <th>Network</th>
                 <th>Country</th>
-                <th>Subdivision</th>
+                <th>Region</th>
                 <th>City</th>
                 <th>Postal</th>
                 <th>Actions</th>

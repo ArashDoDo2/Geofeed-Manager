@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getRouteHandlerUser } from '@/lib/supabase-server'
 import { logActivity } from '@/lib/activity-log'
+import { isValidAlpha2Code, normalizeAlpha2Code } from '@/lib/alpha2-codes'
 
 function isValidCIDR(cidr: string): boolean {
   const cidrRegex =
@@ -9,9 +10,6 @@ function isValidCIDR(cidr: string): boolean {
   return cidrRegex.test(cidr.trim())
 }
 
-function isValidCountryCode(code: string): boolean {
-  return /^[A-Z]{2}$/.test(code.trim())
-}
 
 export async function POST(
   request: NextRequest,
@@ -49,7 +47,7 @@ export async function POST(
     }) =>
       [
         (item.network || '').trim(),
-        (item.countryCode || '').trim().toUpperCase(),
+        normalizeAlpha2Code(item.countryCode || ''),
         (item.subdivision || '').trim(),
         (item.city || '').trim(),
         (item.postalCode || '').trim(),
@@ -107,7 +105,7 @@ export async function POST(
       }
 
       const network = (record.network || '').trim()
-      const countryCode = (record.countryCode || '').trim().toUpperCase()
+      const countryCode = normalizeAlpha2Code(record.countryCode || '')
       const subdivision = record.subdivision ? record.subdivision.trim() : ''
       const city = record.city ? record.city.trim() : ''
       const postalCode = record.postalCode ? record.postalCode.trim() : ''
@@ -121,10 +119,10 @@ export async function POST(
         return
       }
 
-      if (!countryCode || !isValidCountryCode(countryCode)) {
+      if (!countryCode || !isValidAlpha2Code(countryCode)) {
         errors.push({
           index,
-          reason: 'Invalid country code',
+          reason: 'Invalid alpha2code',
           value: record.original || '',
         })
         return

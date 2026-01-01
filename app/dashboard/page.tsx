@@ -14,6 +14,7 @@ import type {
   GeofeedFile,
   ImportRow,
 } from './_components/types'
+import { isValidAlpha2Code, normalizeAlpha2Code } from '@/lib/alpha2-codes'
 
 const ACTIVITY_TAGS: Record<
   string,
@@ -334,8 +335,6 @@ export default function DashboardPage() {
     return cidrRegex.test(cidr.trim())
   }
 
-  const isValidCountryCode = (code: string) => /^[A-Z]{2}$/.test(code.trim())
-
   const normalizeKey = (row: {
     network?: string | null
     countryCode?: string | null
@@ -345,7 +344,7 @@ export default function DashboardPage() {
   }) =>
     [
       (row.network || '').trim(),
-      (row.countryCode || '').trim().toUpperCase(),
+      normalizeAlpha2Code(row.countryCode || ''),
       (row.subdivision || '').trim(),
       (row.city || '').trim(),
       (row.postalCode || '').trim(),
@@ -391,13 +390,13 @@ export default function DashboardPage() {
       }
 
       const [network, countryCode, subdivision, city, postalCode] = parts.map((p) => p.trim())
-      const normalizedCountry = countryCode.toUpperCase()
+      const normalizedCountry = normalizeAlpha2Code(countryCode)
 
       let reason = ''
       if (!network || !isValidCIDR(network)) {
         reason = 'Invalid CIDR network'
-      } else if (!normalizedCountry || !isValidCountryCode(normalizedCountry)) {
-        reason = 'Invalid country code'
+      } else if (!normalizedCountry || !isValidAlpha2Code(normalizedCountry)) {
+        reason = 'Invalid alpha2code'
       }
 
       const key = normalizeKey({
