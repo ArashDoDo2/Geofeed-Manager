@@ -44,6 +44,8 @@ DATABASE_URL="file:./data/geo.db"
 
 No header row. Empty optional fields are blank between commas.
 
+Alpha2code must be a 2-letter ISO 3166-1 code (case-insensitive). The app also accepts exceptionally reserved and user-assigned codes per RFC 8805.
+
 ```
 203.0.113.0/24,AU,VIC,Melbourne,3000
 198.51.100.0/24,US,CA,San Francisco,94105
